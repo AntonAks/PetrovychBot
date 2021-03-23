@@ -12,12 +12,12 @@ ACCESS_ID = settings.ACCESS_ID
 
 
 async def on_shutdown(dp):
-    await bot.send_message(ACCESS_ID, "By!")
+    await bot.send_message(ACCESS_ID, "Пока!")
     await bot.close()
 
 
 async def on_startup(dp):
-    await bot.send_message(ACCESS_ID, "I'm here")
+    await bot.send_message(ACCESS_ID, "Привет, я Петрович")
 
 
 if __name__ == '__main__':

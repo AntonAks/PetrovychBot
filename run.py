@@ -27,7 +27,7 @@ class ParallelProcess:
         # schedule.every(1).minutes.do(P_schedule.send_message2)
         while True:
             store_currency_rates()
-            time.sleep(600)
+            time.sleep(settings.CURRENCY_RELOAD_TIME)
 
 
 if __name__ == '__main__':

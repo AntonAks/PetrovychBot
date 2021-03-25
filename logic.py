@@ -29,7 +29,7 @@ async def send_about(message: types.Message):
     keyboard.add(eur_rates)
     keyboard.add(rub_rates)
 
-    await bot.send_message(message["chat"]["id"], "Выберите банк", reply_markup=keyboard)
+    await bot.send_message(message["chat"]["id"], "Прошу выбрать валюту", reply_markup=keyboard)
 
 
 @dp.callback_query_handler(lambda c: c.data == 'USD')

@@ -66,6 +66,7 @@ pytestdebug.log
 *.log
 local_settings.py
 db.sqlite3
+database.sqlite3
 db.sqlite3-journal
 
 # Flask stuff:
@@ -148,7 +149,7 @@ dmypy.json
 *.DS_Store #file properties cache/storage on macOS
 Thumbs.db #thumbnail cache on Windows
 
-# profiling data
+# profiling data_collector
 .prof
 
 

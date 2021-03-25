@@ -149,7 +149,7 @@ dmypy.json
 *.DS_Store #file properties cache/storage on macOS
 Thumbs.db #thumbnail cache on Windows
 
-# profiling data
+# profiling data_collector
 .prof
 
 

@@ -2,9 +2,9 @@ import logging
 import settings
 from aiogram import Bot, Dispatcher, types
 from midlwares import AccessMiddleware
-from bot_commands import kurs, help
+from bot_commands import kurs, help, aphorism
 from free_talk import short_talk
-
+from data_collector import store_message
 
 # bot = Bot(token=API_TOKEN, proxy=PROXY_URL, proxy_auth=PROXY_AUTH)
 bot = Bot(token=settings.API_TOKEN)
@@ -15,6 +15,12 @@ dp = Dispatcher(bot)
 @dp.message_handler(commands=['start', 'help'])
 async def send_help(message: types.Message):
     await message.answer(help.answer_help_command)
+
+
+@dp.message_handler(commands=['aphorism'])
+async def send_aphorism(message: types.Message):
+    aphorism_answer = aphorism.get_aphorism()
+    await message.answer(aphorism_answer)
 
 
 @dp.message_handler(commands=['kurs'])
@@ -47,16 +53,14 @@ async def callback_worker_2(call: types.CallbackQuery):
     await bot.send_message(call["message"]["chat"]["id"], kurs.get_currency_rates('RUB'))
 
 
-# @dp.message_handler(lambda message: message.text.startswith('@AntonAksBot'))
-# async def short_talk_handler(message: types.Message):
-#     print(message["chat"])
-#     await message.answer(message['text'])
-
 @dp.message_handler()
 async def message_handler(message: types.Message):
     text = message['text']
     answer = short_talk.short_talk_answer(text)
     if answer:
-        await message.answer(answer)
+        await message.answer(answer[0])
+        store_message(message, answer[1])
+    else:
+        store_message(message)
 
 logging.basicConfig(level=logging.INFO)

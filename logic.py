@@ -5,7 +5,6 @@ from midlwares import AccessMiddleware
 from bot_commands import kurs, help, aphorism, news
 from free_talk import short_talk
 from data_collector import store_message
-from telegram_bot_pagination import InlineKeyboardPaginator
 
 # bot = Bot(token=API_TOKEN, proxy=PROXY_URL, proxy_auth=PROXY_AUTH)
 bot = Bot(token=settings.API_TOKEN)

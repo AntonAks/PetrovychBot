@@ -20,6 +20,3 @@ def get_aphorism():
 
     return answer_string
 
-
-if __name__ == '__main__':
-    get_aphorism()

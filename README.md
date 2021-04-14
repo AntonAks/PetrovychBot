@@ -1,6 +1,6 @@
 ﻿# PetrovychBot
 
-![alt text](https://github.com/AntonAks/PetrovychBot/blob/master/icon.jpg?raw=true)
+![alt text](https://github.com/AntonAks/PetrovychBot/blob/main/icon.jpg?raw=true)
 
 Телеграм Бот Иван Петрович. 
 Парсит новости с нескольких украинских порталов а так же курсы евро и доллара к украинской гривне.  

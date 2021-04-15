@@ -76,14 +76,27 @@ async def send_about(message: types.Message):
     usd_rates = types.InlineKeyboardButton(text='USD', callback_data='USD')
     eur_rates = types.InlineKeyboardButton(text='EUR', callback_data='EUR')
     rub_rates = types.InlineKeyboardButton(text='RUB', callback_data='RUB')
-    keyboard.row(usd_rates, eur_rates, rub_rates)
 
+    exchange_btn = types.InlineKeyboardButton(text='Конвертер валют', callback_data='Exchange')
+
+    keyboard.row(usd_rates, eur_rates, rub_rates)
+    keyboard.add(exchange_btn)
     await bot.send_message(message["chat"]["id"], "Прошу выбрать валюту", reply_markup=keyboard)
 
 
 @dp.callback_query_handler(lambda c: c.data in ['USD', 'EUR', 'RUB'])
 async def callback_worker(call: types.CallbackQuery):
     await bot.send_message(call["message"]["chat"]["id"], kurs.get_currency_rates(call['data']))
+
+
+@dp.callback_query_handler(lambda c: c.data == 'Exchange')
+async def callback_worker(call: types.CallbackQuery):
+    msg = "Введите слово 'Обмен или Меняю' и после, через пробел сумму, название валюты продажи, и валюту покупки. \n" \
+          "\n" \
+          "Пример 1: Обмен 45.6 USD на UAH \n" \
+          "Пример 2: Меняю 50 долларов на евро \n"
+
+    await bot.send_message(call["message"]["chat"]["id"], msg)
 
 
 @dp.message_handler()

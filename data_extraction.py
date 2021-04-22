@@ -7,7 +7,6 @@ from botocore.exceptions import NoCredentialsError
 from pymongo import MongoClient
 
 
-
 def upload_to_s3(local_file):
 
     s3_client = boto3.client('s3',

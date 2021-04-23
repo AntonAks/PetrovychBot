@@ -1,10 +1,19 @@
+import json
+import boto3
+import settings
 from random import choice
 from engine import get_levenshtein_distance
 from bot_commands.kurs import exchange_currency
-import settings
 
 
-short_talks = settings.SHORT_TALKS
+s3 = boto3.resource('s3',
+                    aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                    aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY
+                    )
+
+obj = s3.Object(settings.AWS_S3_BUCKET_NAME, "short_talks.json")
+body = obj.get()['Body'].read().decode("utf-8")
+short_talks = json.loads(body)
 
 
 def short_talk_answer(message) -> tuple:

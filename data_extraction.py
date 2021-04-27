@@ -4,7 +4,7 @@ import json
 import os
 from datetime import datetime
 from botocore.exceptions import NoCredentialsError
-from pymongo import MongoClient
+from db import messages_collection
 
 
 def upload_to_s3(local_file):
@@ -29,9 +29,6 @@ def upload_to_s3(local_file):
 
 
 def get_chat_data():
-    client = MongoClient(settings.MONGO_DB)
-    db = client.petrovych_db
-    messages_collection = db["chat_messages"]
 
     mongo_cursor = messages_collection.find()
     messages = list(mongo_cursor)

@@ -2,16 +2,9 @@ import requests
 import json
 import settings
 from datetime import datetime, timedelta
-from pymongo import MongoClient
 from bs4 import BeautifulSoup
 from urllib.request import Request, urlopen
-
-
-client = MongoClient(settings.MONGO_DB)
-db = client.petrovych_db
-currency_rates_collection = db["currency_rates"]
-messages_collection = db["chat_messages"]
-news_collection = db["news_collection"]
+from db import currency_rates_collection, messages_collection, news_collection
 
 
 def store_currency_rates():

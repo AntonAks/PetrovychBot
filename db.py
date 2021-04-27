@@ -1,12 +1,10 @@
-import os
-import sqlite3
+import settings
+from pymongo import MongoClient
 
-DEFAULT_PATH = os.path.join(os.path.dirname(__file__), 'database.sqlite3')
+client = MongoClient(settings.MONGO_DB)
+db = client.petrovych_db
 
-
-def db_connect(db_path=DEFAULT_PATH):
-    con = sqlite3.connect(db_path)
-    return con
-
-
+currency_rates_collection = db["currency_rates"]
+news_collection = db["news_collection"]
+messages_collection = db["chat_messages"]
 

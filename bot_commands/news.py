@@ -1,11 +1,8 @@
 import settings
-from pymongo import MongoClient
+from db import news_collection
 
 
 def get_news():
-    client = MongoClient(settings.MONGO_DB)
-    db = client.petrovych_db
-    news_collection = db["news_collection"]
 
     mongo_cursor = news_collection.find().limit(1).sort([('$natural', -1)])
     last_news = list(mongo_cursor)[0]

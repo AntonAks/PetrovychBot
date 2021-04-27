@@ -1,5 +1,5 @@
 import settings
-from pymongo import MongoClient
+from db import currency_rates_collection
 
 #
 currency_codes = {"USD": 840,
@@ -9,10 +9,6 @@ currency_codes = {"USD": 840,
 
 
 def get_currency_rates(currency: str) -> str:
-
-    client = MongoClient(settings.MONGO_DB)
-    db = client.petrovych_db
-    currency_rates_collection = db["currency_rates"]
 
     mongo_cursor = currency_rates_collection.find().limit(1).sort([('$natural', -1)])
     last_rates = list(mongo_cursor)[0]
@@ -86,10 +82,6 @@ def exchange_currency(msg):
 
     if cur1 == cur2:
         return f"{value} {cur2}", True
-
-    client = MongoClient(settings.MONGO_DB)
-    db = client.petrovych_db
-    currency_rates_collection = db["currency_rates"]
 
     mongo_cursor = currency_rates_collection.find().limit(1).sort([('$natural', -1)])
     last_rates = list(mongo_cursor)[0]

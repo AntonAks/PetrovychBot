@@ -41,6 +41,16 @@ async def send_help(message: types.Message, page=0):
     await get_news(message["chat"]["id"], page)
 
 
+@dp.message_handler(commands=['reminder'])
+async def send_help(message: types.Message):
+    msg = "Введите дату и событие/действие о котором следует напомнить \n" \
+          "\n" \
+          "Пример 1: Петрович, напомни завтра в 14:00 вынести мусор \n" \
+          "Пример 2: Петрович, напомни 14.10.2021 в 08:50 позвонить в банк \n"
+
+    await message.answer(msg)
+
+
 @dp.callback_query_handler(lambda c: c.data in ['<<', '>>'])
 async def characters_page_callback(call):
     page = int(call.message.text.split('/')[0])
@@ -101,8 +111,8 @@ async def callback_worker(call: types.CallbackQuery):
 
 @dp.message_handler()
 async def message_handler(message: types.Message):
-    text = message['text']
-    answer = short_talk.short_talk_answer(text)
+
+    answer = short_talk.short_talk_answer(message)
     if answer:
         await message.answer(answer[0])
         store_message(message, answer[1])

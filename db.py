@@ -7,4 +7,5 @@ db = client.petrovych_db
 currency_rates_collection = db["currency_rates"]
 news_collection = db["news_collection"]
 messages_collection = db["chat_messages"]
+reminder_collection = db['reminder_collection']
 

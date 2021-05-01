@@ -15,3 +15,7 @@
 - Python >= 3.7
 - Mongo DB
 - прочие модули описаны в requirements.txt
+
+## For deployment
+- AWS EC2
+- AWS S3

@@ -2,9 +2,10 @@ import logging
 import settings
 from aiogram import Bot, Dispatcher, types
 from midlwares import AccessMiddleware
-from bot_commands import kurs, help, aphorism, news
+from bot_commands import kurs, help, aphorism, news, reminder
 from free_talk import short_talk
 from data_collector import store_message
+
 
 # bot = Bot(token=API_TOKEN, proxy=PROXY_URL, proxy_auth=PROXY_AUTH)
 bot = Bot(token=settings.API_TOKEN)
@@ -48,7 +49,53 @@ async def send_help(message: types.Message):
           "Пример 1: Петрович, напомни завтра в 14:00 вынести мусор \n" \
           "Пример 2: Петрович, напомни 14.10.2021 в 08:50 позвонить в банк \n"
 
-    await message.answer(msg)
+    keyboard = types.InlineKeyboardMarkup()
+    saved_reminders_btn = types.InlineKeyboardButton(text='Сохраненные напоминания',
+                                                     callback_data='show_reminders')
+
+    keyboard.add(saved_reminders_btn)
+
+    await bot.send_message(message["chat"]["id"], msg, reply_markup=keyboard)
+
+
+@dp.callback_query_handler(lambda c: c.data in ['show_reminders',
+                                                'delete_reminders',
+                                                'delete_reminders_confirm_yes',
+                                                'delete_reminders_confirm_no'])
+async def callback_worker(call: types.CallbackQuery):
+    if call['data'] == 'show_reminders':
+        keyboard = types.InlineKeyboardMarkup()
+        delete_reminders_btn = types.InlineKeyboardButton(text='Удаление напоминаний',
+                                                          callback_data='delete_reminders')
+        keyboard.add(delete_reminders_btn)
+
+        reminders_str = reminder.get_reminders(call['from']['id'])
+        if len(reminders_str) > 0:
+            await bot.send_message(call["message"]["chat"]["id"], reminders_str, reply_markup=keyboard)
+        else:
+            await bot.send_message(call["message"]["chat"]["id"], 'Список пуст :(')
+
+    if call['data'] == 'delete_reminders':
+
+        keyboard = types.InlineKeyboardMarkup()
+        confirm_yes_btn = types.InlineKeyboardButton(text='Да, все удалить',
+                                                     callback_data='delete_reminders_confirm_yes')
+        confirm_no_btn = types.InlineKeyboardButton(text='Я передумал',
+                                                    callback_data='delete_reminders_confirm_no')
+
+        keyboard.row(confirm_yes_btn, confirm_no_btn)
+        await bot.delete_message(
+            call.message.chat.id,
+            call.message.message_id
+        )
+        await bot.send_message(call["message"]["chat"]["id"], "Вы уверены?", reply_markup=keyboard)
+
+    if call['data'] == 'delete_reminders_confirm_yes':
+        reminder.del_reminders(call['from']['id'])
+        await bot.send_message(call["message"]["chat"]["id"], "Удалено")
+
+    if call['data'] == 'delete_reminders_confirm_no':
+        await bot.send_message(call["message"]["chat"]["id"], "Правильное решени")
 
 
 @dp.callback_query_handler(lambda c: c.data in ['<<', '>>'])

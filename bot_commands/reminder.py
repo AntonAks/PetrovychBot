@@ -89,5 +89,21 @@ def check_reminder():
     return send_list
 
 
+def get_reminders(_id):
+    mongo_cursor = reminder_collection.find({"Active": True, "Reminder.from_id": _id}).sort("Reminder.remind_at", 1)
+    reminders = list(mongo_cursor)
+    string = ''
+    for i in reminders:
+        string = string + i['Reminder']['text'] + ' - ' + i['Reminder']['remind_at'].strftime("%Y.%m.%d  %H:%M") + '\n'
+
+    return string
+
+
+def del_reminders(_id):
+    reminder_collection.delete_many({"Active": True, "Reminder.from_id": _id})
+    print("Deleted")
+    return True
+
+
 if __name__ == '__main__':
-    pass
+    get_reminders('antonaks')

@@ -78,9 +78,9 @@ async def callback_worker(call: types.CallbackQuery):
     if call['data'] == 'delete_reminders':
 
         keyboard = types.InlineKeyboardMarkup()
-        confirm_yes_btn = types.InlineKeyboardButton(text='Да, все удалить',
+        confirm_yes_btn = types.InlineKeyboardButton(text='Да, удалить',
                                                      callback_data='delete_reminders_confirm_yes')
-        confirm_no_btn = types.InlineKeyboardButton(text='Я передумал',
+        confirm_no_btn = types.InlineKeyboardButton(text='Не удалять',
                                                     callback_data='delete_reminders_confirm_no')
 
         keyboard.row(confirm_yes_btn, confirm_no_btn)

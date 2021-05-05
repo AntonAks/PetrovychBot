@@ -1,7 +1,10 @@
 from db import reminder_collection
 import re
-
 import datetime
+import pytz
+
+# TODO: Clean hardcoded timezone and adjust automate determination for user timezone
+ukraine_tz = pytz.timezone('Europe/Kiev')
 
 
 def save_reminder_to_db(chat_id, from_id, from_username, create_date, remind_at, msg):
@@ -43,7 +46,7 @@ def create_reminder(message):
     except AttributeError:
         reminder_date = None
 
-    date = datetime.datetime.today()
+    date = datetime.datetime.now(ukraine_tz).replace(tzinfo=None)
 
     if split_text[2] in ['завтра']:
         date = date + datetime.timedelta(days=1)
@@ -66,7 +69,7 @@ def create_reminder(message):
     except ValueError:
         return "Формат времени или значение времени введено не коректно.", False
 
-    if remind_at < datetime.datetime.now():
+    if remind_at < datetime.datetime.now(ukraine_tz).replace(tzinfo=None):
         return "Боюсь что это это время уже настало или прошло...", False
 
     answer = save_reminder_to_db(chat_id, from_id, from_username, create_date, remind_at, reminder_text)
@@ -77,7 +80,7 @@ def create_reminder(message):
 def check_reminder():
     mongo_cursor = reminder_collection.find({"Active": True}, {"Reminder", "Active"})
     alerts = list(mongo_cursor)
-    now = datetime.datetime.now()
+    now = datetime.datetime.now(ukraine_tz).replace(tzinfo=None)
 
     send_list = []
 
@@ -101,9 +104,8 @@ def get_reminders(_id):
 
 def del_reminders(_id):
     reminder_collection.delete_many({"Active": True, "Reminder.from_id": _id})
-    print("Deleted")
     return True
 
 
 if __name__ == '__main__':
-    get_reminders('antonaks')
+    pass

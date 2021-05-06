@@ -12,9 +12,15 @@ s3 = boto3.resource('s3',
                     aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY
                     )
 
-obj = s3.Object(settings.AWS_S3_BUCKET_NAME, "short_talks.json")
-body = obj.get()['Body'].read().decode("utf-8")
+# short talks
+short_talks_obj = s3.Object(settings.AWS_S3_BUCKET_NAME, "short_talks.json")
+body = short_talks_obj.get()['Body'].read().decode("utf-8")
 short_talks = json.loads(body)
+
+# predictions
+# predictions_list_obj = s3.Object(settings.AWS_S3_BUCKET_NAME, "predictions_list.json")
+# body = predictions_list_obj.get()['Body'].read().decode("utf-8")
+# predictions_list = json.loads(body)
 
 
 def short_talk_answer(message) -> tuple:
@@ -37,6 +43,11 @@ def short_talk_answer(message) -> tuple:
     if 'петрович' in text.lower() and text.replace(',', '').split()[1] in ['напомни', 'напомнить', 'напомнишь']:
         answer = create_reminder(message)
         return answer
+
+    # if 'петрович' in text.lower() and 'предскажи будущее' in text.lower():
+    #     predictions = predictions_list['predictions_list']
+    #     answer = choice(predictions), True
+    #     return answer
 
     if 'петрович' in text.lower():
         answer = choice(short_talks['Unknown']['answer']), False

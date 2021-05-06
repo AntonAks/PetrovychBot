@@ -13,6 +13,13 @@ dp = Dispatcher(bot)
 # dp.middleware.setup(AccessMiddleware(settings.ACCESS_ID))
 
 
+async def __del_message(call):
+    await bot.delete_message(
+        call.message.chat.id,
+        call.message.message_id
+    )
+
+
 async def get_news(chat_id, page=0):
     news_list = news.get_news()
 
@@ -70,32 +77,32 @@ async def callback_worker(call: types.CallbackQuery):
         keyboard.add(delete_reminders_btn)
 
         reminders_str = reminder.get_reminders(call['from']['id'])
+        await __del_message(call)
         if len(reminders_str) > 0:
-            await bot.send_message(call["message"]["chat"]["id"], reminders_str, reply_markup=keyboard)
+            await bot.send_message(call["from"]["id"], reminders_str, reply_markup=keyboard)
         else:
-            await bot.send_message(call["message"]["chat"]["id"], 'Список пуст :(')
+            await bot.send_message(call["from"]["id"], 'Список пуст :(')
 
     if call['data'] == 'delete_reminders':
 
-        keyboard = types.InlineKeyboardMarkup()
+        keyboard = types.InlineKeyboardMarkup(one_time_keyboard=True)
         confirm_yes_btn = types.InlineKeyboardButton(text='Да, удалить',
                                                      callback_data='delete_reminders_confirm_yes')
         confirm_no_btn = types.InlineKeyboardButton(text='Не удалять',
                                                     callback_data='delete_reminders_confirm_no')
 
         keyboard.row(confirm_yes_btn, confirm_no_btn)
-        await bot.delete_message(
-            call.message.chat.id,
-            call.message.message_id
-        )
-        await bot.send_message(call["message"]["chat"]["id"], "Вы уверены?", reply_markup=keyboard)
+        await __del_message(call)
+        await bot.send_message(call["from"]["id"], "Вы уверены?", reply_markup=keyboard)
 
     if call['data'] == 'delete_reminders_confirm_yes':
         reminder.del_reminders(call['from']['id'])
-        await bot.send_message(call["message"]["chat"]["id"], "Удалено")
+        await __del_message(call)
+        await bot.send_message(call["from"]["id"], "Удалено")
 
     if call['data'] == 'delete_reminders_confirm_no':
-        await bot.send_message(call["message"]["chat"]["id"], "Правильное решени")
+        await __del_message(call)
+        await bot.send_message(call["from"]["id"], "Правильное решение")
 
 
 @dp.callback_query_handler(lambda c: c.data in ['<<', '>>'])

@@ -20,6 +20,13 @@ async def __del_message(call):
     )
 
 
+async def __del_message2(message):
+    await bot.delete_message(
+        message.chat.id,
+        message.message_id
+    )
+
+
 async def get_news(chat_id, page=0):
     news_list = news.get_news()
 
@@ -139,6 +146,7 @@ async def characters_page_callback(call):
 
 @dp.message_handler(commands=['aphorism'])
 async def send_aphorism(message: types.Message):
+    await __del_message2(message)
     aphorism_answer = aphorism.get_aphorism()
     await message.answer(aphorism_answer)
 
@@ -160,11 +168,13 @@ async def send_about(message: types.Message):
 
 @dp.callback_query_handler(lambda c: c.data in ['USD', 'EUR', 'RUB'])
 async def callback_worker(call: types.CallbackQuery):
+    await __del_message(call)
     await bot.send_message(call["message"]["chat"]["id"], kurs.get_currency_rates(call['data']))
 
 
 @dp.callback_query_handler(lambda c: c.data == 'Exchange')
 async def callback_worker(call: types.CallbackQuery):
+    await __del_message(call)
     msg = "Введите слово 'Обмен или Меняю' и после, через пробел сумму, название валюты продажи, и валюту покупки. \n" \
           "\n" \
           "Пример 1: Обмен 45.6 USD на UAH \n" \

@@ -65,6 +65,16 @@ async def send_help(message: types.Message):
     await bot.send_message(message["chat"]["id"], msg, reply_markup=keyboard)
 
 
+@dp.message_handler(commands=['oracul'])
+async def send_help(message: types.Message):
+    msg = "Я могу заглянуть в будушее или дать совет \n" \
+          "\n" \
+          "Пример 1: Петрович, что меня ждет? \n" \
+          "Пример 2: Петрович, укажи путь \n"
+
+    await bot.send_message(message["chat"]["id"], msg)
+
+
 @dp.callback_query_handler(lambda c: c.data in ['show_reminders',
                                                 'delete_reminders',
                                                 'delete_reminders_confirm_yes',

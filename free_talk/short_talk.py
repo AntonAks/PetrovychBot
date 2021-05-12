@@ -5,6 +5,7 @@ from random import choice
 from engine import get_levenshtein_distance
 from bot_commands.kurs import exchange_currency
 from bot_commands.reminder import create_reminder
+from bot_commands.oracul import is_oracul_command, get_prediction
 
 
 s3 = boto3.resource('s3',
@@ -12,15 +13,9 @@ s3 = boto3.resource('s3',
                     aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY
                     )
 
-# short talks
 short_talks_obj = s3.Object(settings.AWS_S3_BUCKET_NAME, "short_talks.json")
 body = short_talks_obj.get()['Body'].read().decode("utf-8")
 short_talks = json.loads(body)
-
-# predictions
-# predictions_list_obj = s3.Object(settings.AWS_S3_BUCKET_NAME, "predictions_list.json")
-# body = predictions_list_obj.get()['Body'].read().decode("utf-8")
-# predictions_list = json.loads(body)
 
 
 def short_talk_answer(message) -> tuple:
@@ -44,10 +39,9 @@ def short_talk_answer(message) -> tuple:
         answer = create_reminder(message)
         return answer
 
-    # if 'петрович' in text.lower() and 'предскажи будущее' in text.lower():
-    #     predictions = predictions_list['predictions_list']
-    #     answer = choice(predictions), True
-    #     return answer
+    if is_oracul_command(text):
+        answer = get_prediction(), True
+        return answer
 
     if 'петрович' in text.lower():
         answer = choice(short_talks['Unknown']['answer']), False

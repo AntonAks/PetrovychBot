@@ -2,7 +2,7 @@ import json
 import boto3
 import settings
 from random import choice
-from engine import get_levenshtein_distance
+from nltk_engine import get_levenshtein_distance
 from bot_commands.kurs import exchange_currency
 from bot_commands.reminder import create_reminder
 from bot_commands.oracul import is_oracul_command, get_prediction

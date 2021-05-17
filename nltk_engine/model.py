@@ -6,6 +6,8 @@ from random import choice
 from torch.utils.data import Dataset, DataLoader
 from nltk_engine import tokenize, stem, bag_of_words
 
+DATA_FILE = "train_data.pth"
+
 
 class NeuralNet(nn.Module):
 
@@ -118,17 +120,16 @@ def train(short_talk_dict):
         "tags": tags
     }
 
-    FILE = "data.pth"
-    torch.save(data, FILE)
 
-    print(f'training complete. file saved to {FILE}')
+    torch.save(data, DATA_FILE)
+
+    print(f'training complete. file saved to {DATA_FILE}')
 
 
 def model_evaluate():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    FILE = "data.pth"
-    data = torch.load(FILE)
+    data = torch.load(DATA_FILE)
 
     input_size = data["input_size"]
     hidden_size = data["hidden_size"]
@@ -149,8 +150,7 @@ def get_answer(model, device, message_text):
     with open('short_talks.json', 'r', encoding='utf-8') as json_data:
         intents = json.load(json_data)
 
-    FILE = "data.pth"
-    data = torch.load(FILE)
+    data = torch.load(DATA_FILE)
 
     all_words = data['all_words']
     tags = data['tags']

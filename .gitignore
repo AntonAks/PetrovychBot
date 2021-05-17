@@ -155,4 +155,6 @@ Thumbs.db #thumbnail cache on Windows
 # internal test
 test.py
 
+# NLTK DATA FILES
+train_data.pth
 # End of https://www.toptal.com/developers/gitignore/api/python

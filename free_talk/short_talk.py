@@ -2,7 +2,8 @@ import json
 import boto3
 import settings
 from random import choice
-from engine import get_levenshtein_distance
+from nltk_engine import get_levenshtein_distance
+from nltk_engine import model
 from bot_commands.kurs import exchange_currency
 from bot_commands.reminder import create_reminder
 from bot_commands.oracul import is_oracul_command, get_prediction
@@ -22,14 +23,14 @@ def short_talk_answer(message) -> tuple:
 
     text = message['text']
 
-    keys = short_talks.keys()
-    for key in keys:
-        for phrase in short_talks[key]['phrase']:
-            if get_levenshtein_distance(phrase, text)[2] or \
-                    get_levenshtein_distance('Петрович ' + phrase, text)[2] or \
-                    get_levenshtein_distance(phrase + ' Петрович', text)[2]:
-                answer = choice(short_talks[key]['answer']), True
-                return answer
+    # keys = short_talks.keys()
+    # for key in keys:
+    #     for phrase in short_talks[key]['phrase']:
+    #         if get_levenshtein_distance(phrase, text)[2] or \
+    #                 get_levenshtein_distance('Петрович ' + phrase, text)[2] or \
+    #                 get_levenshtein_distance(phrase + ' Петрович', text)[2]:
+    #             answer = choice(short_talks[key]['answer']), True
+    #             return answer
 
     if text.lower().startswith('обмен') or text.lower().startswith('меняю'):
         answer = exchange_currency(text)
@@ -44,5 +45,8 @@ def short_talk_answer(message) -> tuple:
         return answer
 
     if 'петрович' in text.lower():
-        answer = choice(short_talks['Unknown']['answer']), False
+        answer = model.get_answer(text), True
         return answer
+
+    #     answer = choice(short_talks['Unknown']['answer']), False
+    #     return answer

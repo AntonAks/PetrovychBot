@@ -1,3 +1,10 @@
+import nltk
+import numpy as np
+from nltk.stem.porter import PorterStemmer
+
+nltk.download('punkt')
+
+
 def get_levenshtein_distance(first_word: str, second_word: str) -> tuple:
     match = False
     first_word = first_word.lower()
@@ -21,3 +28,22 @@ def get_levenshtein_distance(first_word: str, second_word: str) -> tuple:
         match = True
     return current_row[n],  current_row[n] / len(first_word), match
 
+
+def tokenize(sentence):
+    return nltk.word_tokenize(sentence)
+
+
+def stem(word):
+    stemmer = PorterStemmer()
+    return stemmer.stem(word.lower())
+
+
+def bag_of_words(tokenized_sentence, all_words):
+
+    tokenized_sentence = [stem(w) for w in tokenized_sentence]
+    bag = np.zeros(len(all_words), dtype=np.float32)
+    for idx, w in enumerate(all_words):
+        if w in tokenized_sentence:
+            bag[idx] = 1.0
+
+    return bag

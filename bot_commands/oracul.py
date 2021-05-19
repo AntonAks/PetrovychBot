@@ -1,7 +1,7 @@
 import boto3
 import settings
 import json
-from engine import get_levenshtein_distance
+from nltk_engine import get_levenshtein_distance
 from random import choice
 
 ORACUL_COMMANDS = ['что меня ждет?',

@@ -1,12 +1,25 @@
 import json
+import os
 import numpy as np
 import torch
 import torch.nn as nn
+import boto3
+import settings
 from random import choice
 from torch.utils.data import Dataset, DataLoader
 from nltk_engine import tokenize, stem, bag_of_words
 
-DATA_FILE = "train_data.pth"
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATA_FILE = os.path.join(BASE_DIR, "train_data.pth")
+
+data = torch.load(DATA_FILE)
+
+input_size = data["input_size"]
+hidden_size = data["hidden_size"]
+output_size = data["output_size"]
+model_state = data["model_state"]
+all_words = data['all_words']
+tags = data['tags']
 
 
 class NeuralNet(nn.Module):
@@ -126,34 +139,22 @@ def train(short_talk_dict):
     print(f'training complete. file saved to {DATA_FILE}')
 
 
-def model_evaluate():
+def get_answer(message_text):
+
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-    data = torch.load(DATA_FILE)
-
-    input_size = data["input_size"]
-    hidden_size = data["hidden_size"]
-    output_size = data["output_size"]
-    all_words = data['all_words']
-    tags = data['tags']
-    model_state = data["model_state"]
 
     model = NeuralNet(input_size, hidden_size, output_size).to(device)
     model.load_state_dict(model_state)
     model.eval()
 
-    return model
+    s3 = boto3.resource('s3',
+                        aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY
+                        )
 
-
-def get_answer(model, device, message_text):
-
-    with open('short_talks.json', 'r', encoding='utf-8') as json_data:
-        intents = json.load(json_data)
-
-    data = torch.load(DATA_FILE)
-
-    all_words = data['all_words']
-    tags = data['tags']
+    short_talks_obj = s3.Object(settings.AWS_S3_BUCKET_NAME, "short_talks.json")
+    body = short_talks_obj.get()['Body'].read().decode("utf-8")
+    intents = json.loads(body)
 
     sentence = tokenize(message_text)
     x = bag_of_words(sentence, all_words)
@@ -168,6 +169,7 @@ def get_answer(model, device, message_text):
     probs = torch.softmax(output, dim=1)
     prob = probs[0][predicted.item()]
     if prob.item() > 0.75:
-        return f"{choice(intents[tag]['answer'])}, {tag}, {prob.item()}"
+        return choice(intents[tag]['answer'])
     else:
-        return f"{choice(intents['Unknown']['answer'])}, {tag}, {prob.item()}"
+        return choice(intents['Unknown']['answer'])
+

@@ -12,14 +12,17 @@ from nltk_engine import tokenize, stem, bag_of_words
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_FILE = os.path.join(BASE_DIR, "train_data.pth")
 
-data = torch.load(DATA_FILE)
+try:
+    data = torch.load(DATA_FILE)
 
-input_size = data["input_size"]
-hidden_size = data["hidden_size"]
-output_size = data["output_size"]
-model_state = data["model_state"]
-all_words = data['all_words']
-tags = data['tags']
+    input_size = data["input_size"]
+    hidden_size = data["hidden_size"]
+    output_size = data["output_size"]
+    model_state = data["model_state"]
+    all_words = data['all_words']
+    tags = data['tags']
+except FileNotFoundError:
+    pass
 
 
 class NeuralNet(nn.Module):

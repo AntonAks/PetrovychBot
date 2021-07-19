@@ -153,6 +153,7 @@ Thumbs.db #thumbnail cache on Windows
 .prof
 
 # internal test
+temp
 test.py
 
 # NLTK DATA FILES

@@ -19,3 +19,6 @@
 ## For deployment
 - AWS EC2
 - AWS S3
+
+## Example
+![alt text](https://github.com/AntonAks/PetrovychBot/blob/main/bot_pic.jpg?raw=true)

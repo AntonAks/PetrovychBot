@@ -1,3 +1,4 @@
+import logging
 import requests
 import json
 import settings
@@ -93,7 +94,7 @@ class NewsCollector:
 
     @staticmethod
     def get_liga_news() -> dict:
-        site = "https://ua-news.liga.net/"
+        site = "https://news.liga.net/ua?utm_source=ua-news"
         hdr = {'User-Agent': 'Mozilla/5.0'}
         req = Request(site, headers=hdr)
         page = urlopen(req)
@@ -249,7 +250,9 @@ class NewsCollector:
 
         for function in call_stack:
             try:
+                start = datetime.now()
                 result = function()
+                logging.info(f"Stored news: {function.__name__}, {datetime.now() - start}" )
             except Exception:
                 result = None
 

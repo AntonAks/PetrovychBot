@@ -1,10 +1,11 @@
+import logging
 import asyncio
 import aioschedule
 import settings
 from aiogram import executor
 from logic import bot, dp
 from data_collector import NewsCollector, store_currency_rates
-from bot_commands.reminder import check_reminder
+from commands.reminder import check_reminder
 
 
 async def task_store_currency_rates():
@@ -40,7 +41,14 @@ async def on_startup(dp):
 
 
 if __name__ == '__main__':
+    logging.info('Bot started')
+    store_currency_rates()
+    logging.info('Initial currency rates data - stored')
+    NewsCollector.collect_news_data()
+    logging.info('Initial news data - stored')
+
     try:
         executor.start_polling(dp, skip_updates=True, on_startup=on_startup, on_shutdown=on_shutdown)
     except Exception as e:
         print(e)
+

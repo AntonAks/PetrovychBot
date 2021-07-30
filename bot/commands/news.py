@@ -1,4 +1,3 @@
-import settings
 from db import news_collection
 
 

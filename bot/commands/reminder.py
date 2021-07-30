@@ -74,7 +74,7 @@ def create_reminder(message):
 
     answer = save_reminder_to_db(chat_id, from_id, from_username, create_date, remind_at, reminder_text)
 
-    return answer, True
+    return answer
 
 
 def check_reminder():

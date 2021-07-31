@@ -1,13 +1,11 @@
-from db import reminder_collection
+import logging
+import pytz
+from db import reminder_collection, User
 import re
 import datetime
-import pytz
-
-# TODO: Clean hardcoded timezone and adjust automate determination for user timezone
-ukraine_tz = pytz.timezone('Europe/Kiev')
 
 
-def save_reminder_to_db(chat_id, from_id, from_username, create_date, remind_at, msg):
+def save_reminder_to_db(chat_id, from_id, from_username, create_date, remind_at, msg, user_timezone):
 
     reminder_collection.insert_one({
         "Date": datetime.datetime.now(),
@@ -18,6 +16,7 @@ def save_reminder_to_db(chat_id, from_id, from_username, create_date, remind_at,
             "create_date": create_date,
             "remind_at": remind_at,
             "text": msg,
+            "user_timezone": str(user_timezone)
         },
         "Active": True
     })
@@ -26,6 +25,8 @@ def save_reminder_to_db(chat_id, from_id, from_username, create_date, remind_at,
 
 
 def create_reminder(message):
+
+    user = User(message['from']['id'])
 
     text = message['text']
     chat_id = message['chat']['id']
@@ -46,7 +47,7 @@ def create_reminder(message):
     except AttributeError:
         reminder_date = None
 
-    date = datetime.datetime.now(ukraine_tz).replace(tzinfo=None)
+    date = datetime.datetime.now(pytz.timezone(user.last_timezone)).replace(tzinfo=None)
 
     if split_text[2] in ['завтра']:
         date = date + datetime.timedelta(days=1)
@@ -69,10 +70,16 @@ def create_reminder(message):
     except ValueError:
         return "Формат времени или значение времени введено не коректно.", False
 
-    if remind_at < datetime.datetime.now(ukraine_tz).replace(tzinfo=None):
+    if remind_at < datetime.datetime.now(pytz.timezone(user.last_timezone)).replace(tzinfo=None):
         return "Боюсь что это это время уже настало или прошло...", False
 
-    answer = save_reminder_to_db(chat_id, from_id, from_username, create_date, remind_at, reminder_text)
+    answer = save_reminder_to_db(chat_id,
+                                 from_id,
+                                 from_username,
+                                 create_date,
+                                 remind_at,
+                                 reminder_text,
+                                 user.last_timezone)
 
     return answer
 
@@ -80,11 +87,11 @@ def create_reminder(message):
 def check_reminder():
     mongo_cursor = reminder_collection.find({"Active": True}, {"Reminder", "Active"})
     alerts = list(mongo_cursor)
-    now = datetime.datetime.now(ukraine_tz).replace(tzinfo=None)
 
     send_list = []
 
     for i in alerts:
+        now = datetime.datetime.now(pytz.timezone(i['Reminder']['user_timezone'])).replace(tzinfo=None)
         if i['Reminder']['remind_at'] < now:
             reminder_collection.update_one({"_id": i["_id"]}, {"$set": {"Active": False}})
             send_list.append({'user': i['Reminder']['from_id'], 'text': i['Reminder']['text']})
@@ -105,7 +112,3 @@ def get_reminders(_id):
 def del_reminders(_id):
     reminder_collection.delete_many({"Active": True, "Reminder.from_id": _id})
     return True
-
-
-if __name__ == '__main__':
-    pass

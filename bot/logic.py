@@ -1,10 +1,11 @@
 import logging
 import settings
-from aiogram import Bot, Dispatcher, types
 import commands
+from timezonefinder import TimezoneFinder
+from aiogram import Bot, Dispatcher, types
 from commands import news, kurs, aphorism, reminder
 from nlp_engine import short_talk
-from db import store_message
+from db import User
 from midlwares import AccessMiddleware
 
 # bot = Bot(token=API_TOKEN, proxy=PROXY_URL, proxy_auth=PROXY_AUTH)
@@ -27,9 +28,25 @@ async def __del_message2(message):
     )
 
 
-@dp.message_handler(commands=['start', 'help'])
+@dp.message_handler(commands=['start'])
+async def start(message: types.Message):
+
+    user = User(message.from_user.id)
+    try:
+        user.user_name = message.from_user.username
+    except Exception:
+        user.user_name = None
+    user.add_user()
+
+    reg_button = types.KeyboardButton("Обновить часовой пояс", request_location=True)
+    keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+    keyboard.add(reg_button)
+    await message.answer(commands.start_, reply_markup=keyboard)
+
+
+@dp.message_handler(commands=['help'])
 async def send_help(message: types.Message):
-    await message.answer(commands.start)
+    await message.answer(commands.help_)
 
 
 async def get_news(chat_id, page=0):
@@ -190,6 +207,23 @@ async def send_help(message: types.Message):
           "Пример 2: Укажи путь \n"
 
     await bot.send_message(message["chat"]["id"], msg)
+
+
+@dp.message_handler()
+async def message_handler(message: types.Message):
+    answer = short_talk.short_talk_answer(message)
+    if answer:
+        await message.answer(answer)
+
+
+@dp.message_handler(content_types=['location'])
+async def handle_location(message: types.Message):
+    tzf = TimezoneFinder()
+    user = User(message.from_user.id)
+    time_zone = tzf.timezone_at(lng=message.location.longitude, lat=message.location.latitude)
+    user.update_timezone(time_zone)
+    await __del_message2(message)
+    await message.answer('Спасибо')
 
 
 @dp.message_handler()

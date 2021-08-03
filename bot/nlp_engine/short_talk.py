@@ -19,20 +19,42 @@ short_talks = json.loads(body)
 
 
 def short_talk_answer(message) -> str:
+
     text = message['text']
 
-    if text.lower().startswith('обмен') or text.lower().startswith('меняю'):
-        answer = exchange_currency(text)
+    if message["chat"]["type"] == 'private':
+        if text.lower().startswith('обмен') or text.lower().startswith('меняю'):
+            answer = exchange_currency(text)
+            return answer
+
+        if any(word in text.lower() for word in ['напомни', 'напомнить', 'напомнишь']):
+            answer = create_reminder(message)
+            return answer
+
+        if is_oracul_command(text):
+            answer = get_prediction()
+            return answer
+
+        answer_key = find_answer(text, short_talks)
+        answer = choice(short_talks[answer_key]['answer'])
         return answer
 
-    if text.replace(',', '').split()[0].lower() in ['напомни', 'напомнить', 'напомнишь']:
-        answer = create_reminder(message)
-        return answer
+    else:
+        if text.lower().startswith('обмен') or text.lower().startswith('меняю'):
+            answer = exchange_currency(text)
+            return answer
 
-    if is_oracul_command(text):
-        answer = get_prediction()
-        return answer
+        if 'петрович' in text.lower() and any(word in text.lower() for word in ['напомни', 'напомнить', 'напомнишь']):
+            answer = create_reminder(message)
+            return answer
 
-    answer_key = find_answer(text, short_talks)
-    answer = choice(short_talks[answer_key]['answer'])
-    return answer
+        if is_oracul_command(text):
+            answer = get_prediction()
+            return answer
+
+        if 'петрович' in text.lower():
+            text = text.lower()
+            text = text.replace('петрович', '')
+            answer_key = find_answer(text, short_talks)
+            answer = choice(short_talks[answer_key]['answer'])
+            return answer

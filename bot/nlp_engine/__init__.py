@@ -22,9 +22,14 @@ def get_levenshtein_distance(first_word: str, second_word: str) -> tuple:
             if first_word[j - 1] != second_word[i - 1]:
                 change += 1
             current_row[j] = min(add, delete, change)
-    if (current_row[n] / len(first_word)) <= 0.15:
-        match = True
-    return current_row[n],  current_row[n] / len(first_word), match
+    try:
+        percent = current_row[n] / len(first_word)
+        if percent <= 0.15:
+            match = True
+    except ZeroDivisionError:
+        match = False
+        percent = 0
+    return current_row[n],  percent, match
 
 
 def lev_deist_for_lists(list1, list2):
@@ -32,7 +37,6 @@ def lev_deist_for_lists(list1, list2):
         return False
 
     result = [l1 for l1 in list1 for l2 in list2 if get_levenshtein_distance(l1, l2)[2]]
-
     if abs(len(list1) - len(result)) < 1:
         return True
 
@@ -42,14 +46,13 @@ def find_answer(user_text, short_talk_dict):
     ignore_words = ['?', '!', '.', ',']
 
     user_text_tokenized = nltk.word_tokenize(user_text)
-    user_text_list = [x for x in user_text_tokenized if x not in ignore_words]
+    user_text_list = [x.lower() for x in user_text_tokenized if x not in ignore_words]
 
     keys = short_talk_dict.keys()
     for key in keys:
         for phrase in short_talk_dict[key]['phrase']:
             phrase_tokenized = nltk.word_tokenize(phrase)
             words = [word for word in phrase_tokenized if word not in ignore_words]
-
             if lev_deist_for_lists(user_text_list, words):
                 result = key
                 return result

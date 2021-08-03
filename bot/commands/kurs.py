@@ -68,20 +68,20 @@ def exchange_currency(msg):
     try:
         value, cur1, cur2,  = __parse_message(msg)
     except IndexError:
-        return 'Пссс.. Могу предложить обменять валюту... воспользуйтесь меню /kurs', False
+        return 'Пссс.. Могу предложить обменять валюту... воспользуйтесь меню /kurs'
 
     result_value = 0
 
     if None in [cur1, cur2, value]:
-        return 'Боюсь, что вы допустили ошибку, попробуйте еще разок...', False
+        return 'Боюсь, что вы допустили ошибку, попробуйте еще разок...'
 
     if cur1 == 'RUB' and cur2 != 'UAH':
-        return 'Прости, для рубля я такое делать не буду...', False
+        return 'Прости, для рубля я такое делать не буду...'
     elif cur2 == 'RUB' and cur1 != 'UAH':
-        return 'Прости, для рубля я такое делать не буду...', False
+        return 'Прости, для рубля я такое делать не буду...'
 
     if cur1 == cur2:
-        return f"{value} {cur2}", True
+        return f"{value} {cur2}"
 
     mongo_cursor = currency_rates_collection.find().limit(1).sort([('$natural', -1)])
     last_rates = list(mongo_cursor)[0]
@@ -92,4 +92,4 @@ def exchange_currency(msg):
         elif i['currencyCodeA'] == currency_codes[cur2] and i['currencyCodeB'] == currency_codes[cur1]:
             result_value = value / i['rateSell']
 
-    return f"{result_value.__round__(4)} {cur2}", True
+    return f"{result_value.__round__(4)} {cur2}"

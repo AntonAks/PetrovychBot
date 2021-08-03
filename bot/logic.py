@@ -103,10 +103,10 @@ async def send_about(message: types.Message):
     eur_rates = types.InlineKeyboardButton(text='EUR', callback_data='EUR')
     rub_rates = types.InlineKeyboardButton(text='RUB', callback_data='RUB')
 
-    keyboard.add(usd_rates)
-    keyboard.add(eur_rates)
-    keyboard.add(rub_rates)
+    exchange_btn = types.InlineKeyboardButton(text='Конвертер валют', callback_data='Exchange')
 
+    keyboard.row(usd_rates, eur_rates, rub_rates)
+    keyboard.add(exchange_btn)
     await bot.send_message(message["chat"]["id"], "Выберите банк", reply_markup=keyboard)
 
 

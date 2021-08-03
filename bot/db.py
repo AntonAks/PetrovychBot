@@ -1,14 +1,14 @@
 import json
 import logging
 import pytz
+import settings
 from datetime import datetime
 from pymongo import MongoClient
 
 # TODO: Clean hardcoded timezone and adjust automate determination for user timezone
-default_tz = pytz.timezone('Europe/Kiev')
+default_tz = str(pytz.timezone('Europe/Kiev'))
 
-MONGO_DB = "mongodb://db:27017"
-client = MongoClient(MONGO_DB)
+client = MongoClient(settings.MONGO_DB)
 db = client.petrovych_db
 
 currency_rates_collection = db["currency_rates"]

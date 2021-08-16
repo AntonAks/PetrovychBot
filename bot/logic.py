@@ -110,19 +110,10 @@ async def send_about(message: types.Message):
     await bot.send_message(message["chat"]["id"], "Выберите валюту", reply_markup=keyboard)
 
 
-@dp.callback_query_handler(lambda c: c.data == 'USD')
+@dp.callback_query_handler(lambda c: c.data in ['USD', 'EUR', 'RUB'])
 async def callback_worker_1(call: types.CallbackQuery):
-    await bot.send_message(call["message"]["chat"]["id"], kurs.get_currency_rates('USD'))
+    await bot.send_message(call["message"]["chat"]["id"], kurs.get_currency_rates(call['data']))
 
-
-@dp.callback_query_handler(lambda c: c.data == 'EUR')
-async def callback_worker_2(call: types.CallbackQuery):
-    await bot.send_message(call["message"]["chat"]["id"], kurs.get_currency_rates('EUR'))
-
-
-@dp.callback_query_handler(lambda c: c.data == 'RUB')
-async def callback_worker_2(call: types.CallbackQuery):
-    await bot.send_message(call["message"]["chat"]["id"], kurs.get_currency_rates('RUB'))
 
 
 @dp.callback_query_handler(lambda c: c.data == 'Exchange')

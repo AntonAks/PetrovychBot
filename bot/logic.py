@@ -12,7 +12,7 @@ from midlwares import BlackListMiddleware, AdminAccessMiddleware
 # bot = Bot(token=API_TOKEN, proxy=PROXY_URL, proxy_auth=PROXY_AUTH)
 bot = Bot(token=settings.API_TOKEN)
 dp = Dispatcher(bot)
-dp.middleware.setup(AdminAccessMiddleware(settings.ACCESS_ID))
+#dp.middleware.setup(AdminAccessMiddleware(settings.ACCESS_ID))
 dp.middleware.setup(BlackListMiddleware())
 
 

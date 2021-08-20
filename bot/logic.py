@@ -5,13 +5,15 @@ from timezonefinder import TimezoneFinder
 from aiogram import Bot, Dispatcher, types
 from commands import news, kurs, aphorism, reminder
 from nlp_engine import short_talk
+from nlp_engine.decorators import blacklist_check
 from db import User
-from midlwares import AccessMiddleware
+from midlwares import AccessMiddleware, BlackListMiddleware
 
 # bot = Bot(token=API_TOKEN, proxy=PROXY_URL, proxy_auth=PROXY_AUTH)
 bot = Bot(token=settings.API_TOKEN)
 dp = Dispatcher(bot)
 # dp.middleware.setup(AccessMiddleware(settings.ACCESS_ID))
+dp.middleware.setup(BlackListMiddleware())
 
 
 async def __del_message(call):
@@ -68,6 +70,7 @@ async def get_news(chat_id, page=0):
         await bot.send_message(chat_id, "На этом пока все :)")
 
 
+@blacklist_check
 @dp.message_handler(commands=['news'])
 async def send_help(message: types.Message, page=0):
     await get_news(message["chat"]["id"], page)
@@ -95,6 +98,7 @@ async def characters_page_callback(call):
         await get_news(call["message"]["chat"]["id"], page)
 
 
+@blacklist_check
 @dp.message_handler(commands=['kurs'])
 async def send_about(message: types.Message):
     keyboard = types.InlineKeyboardMarkup()
@@ -115,7 +119,6 @@ async def callback_worker_1(call: types.CallbackQuery):
     await bot.send_message(call["message"]["chat"]["id"], kurs.get_currency_rates(call['data']))
 
 
-
 @dp.callback_query_handler(lambda c: c.data == 'Exchange')
 async def callback_worker(call: types.CallbackQuery):
     await __del_message(call)
@@ -127,6 +130,7 @@ async def callback_worker(call: types.CallbackQuery):
     await bot.send_message(call["message"]["chat"]["id"], msg)
 
 
+@blacklist_check
 @dp.message_handler(commands=['aphorism'])
 async def send_aphorism(message: types.Message):
     await __del_message2(message)
@@ -134,6 +138,7 @@ async def send_aphorism(message: types.Message):
     await message.answer(aphorism_answer)
 
 
+@blacklist_check
 @dp.message_handler(commands=['reminder'])
 async def send_help(message: types.Message):
     msg = "Введите дату и событие/действие о котором следует напомнить \n" \
@@ -190,6 +195,7 @@ async def callback_worker(call: types.CallbackQuery):
         await bot.send_message(call["from"]["id"], "Правильное решение")
 
 
+@blacklist_check
 @dp.message_handler(commands=['oracul'])
 async def send_help(message: types.Message):
     msg = "Я могу заглянуть в будушее или дать совет \n" \
@@ -202,7 +208,7 @@ async def send_help(message: types.Message):
 
 @dp.message_handler()
 async def message_handler(message: types.Message):
-    answer = short_talk.short_talk_answer(message)
+    answer = short_talk.short_talk_answer(message=message)
     if answer:
         await message.answer(answer)
 
@@ -219,7 +225,7 @@ async def handle_location(message: types.Message):
 
 @dp.message_handler()
 async def message_handler(message: types.Message):
-    answer = short_talk.short_talk_answer(message)
+    answer = short_talk.short_talk_answer(message=message)
     if answer:
         await message.answer(answer)
 

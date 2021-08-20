@@ -153,8 +153,10 @@ Thumbs.db #thumbnail cache on Windows
 .prof
 
 # internal test
+test_folder
 temp
 test.py
+test.json
 
 # NLTK DATA FILES
 train_data.pth

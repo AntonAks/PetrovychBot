@@ -46,6 +46,6 @@ class AdminAccessMiddleware(BaseMiddleware):
         super().__init__()
 
     async def on_process_message(self, message: types.Message, _):
-        if int(message.from_user.id) != int(self.access_id) and '/getusers' not in message.text:
+        if int(message.from_user.id) != int(self.access_id) and '/getusers' in message.text:
             await message.answer("Access Denied")
             raise CancelHandler()

@@ -3,16 +3,16 @@ import settings
 import commands
 from timezonefinder import TimezoneFinder
 from aiogram import Bot, Dispatcher, types
-from commands import news, kurs, aphorism, reminder
+from commands import news, kurs, aphorism, reminder, admin
 from nlp_engine import short_talk
 from nlp_engine.decorators import blacklist_check
 from db import User
-from midlwares import AccessMiddleware, BlackListMiddleware
+from midlwares import BlackListMiddleware, AdminAccessMiddleware
 
 # bot = Bot(token=API_TOKEN, proxy=PROXY_URL, proxy_auth=PROXY_AUTH)
 bot = Bot(token=settings.API_TOKEN)
 dp = Dispatcher(bot)
-# dp.middleware.setup(AccessMiddleware(settings.ACCESS_ID))
+dp.middleware.setup(AdminAccessMiddleware(settings.ACCESS_ID))
 dp.middleware.setup(BlackListMiddleware())
 
 
@@ -49,6 +49,11 @@ async def start(message: types.Message):
 @dp.message_handler(commands=['help'])
 async def send_help(message: types.Message):
     await message.answer(commands.help_)
+
+
+@dp.message_handler(commands=['getusers'])
+async def send_help(message: types.Message):
+    await message.answer(admin.get_users())
 
 
 async def get_news(chat_id, page=0):

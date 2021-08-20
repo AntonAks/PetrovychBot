@@ -5,7 +5,6 @@ import settings
 from datetime import datetime
 from pymongo import MongoClient
 
-# TODO: Clean hardcoded timezone and adjust automate determination for user timezone
 default_tz = str(pytz.timezone('Europe/Kiev'))
 
 client = MongoClient(settings.MONGO_DB)
@@ -71,3 +70,11 @@ class User:
     def __repr__(self):
         return f"user_id: {self.user_id}, name: {self.user_name}, last_timezone: {self.last_timezone}"
 
+    @staticmethod
+    def get_all_users():
+        users_collection.find()
+        return list(users_collection.find())
+
+    @staticmethod
+    def get_user_name():
+        pass

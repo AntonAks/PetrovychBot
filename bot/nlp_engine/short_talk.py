@@ -60,6 +60,8 @@ def group_answer(message) -> str:
         answer = choice(short_talks[answer_key]['answer'])
         return answer
 
+    return ''
+
 
 def short_talk_answer(message=None) -> str:
     if message["chat"]["type"] == 'private':

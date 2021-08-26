@@ -52,7 +52,7 @@ async def send_help(message: types.Message):
 
 
 @dp.message_handler(commands=['getusers'])
-async def send_help(message: types.Message):
+async def get_users(message: types.Message):
     await message.answer(admin.get_users())
 
 
@@ -75,9 +75,8 @@ async def get_news(chat_id, page=0):
         await bot.send_message(chat_id, "На этом пока все :)")
 
 
-@blacklist_check
 @dp.message_handler(commands=['news'])
-async def send_help(message: types.Message, page=0):
+async def get_news_command(message: types.Message, page=0):
     await get_news(message["chat"]["id"], page)
 
 
@@ -120,12 +119,12 @@ async def send_about(message: types.Message):
 
 
 @dp.callback_query_handler(lambda c: c.data in ['USD', 'EUR', 'RUB'])
-async def callback_worker_1(call: types.CallbackQuery):
+async def callback_worker_currency(call: types.CallbackQuery):
     await bot.send_message(call["message"]["chat"]["id"], kurs.get_currency_rates(call['data']))
 
 
 @dp.callback_query_handler(lambda c: c.data == 'Exchange')
-async def callback_worker(call: types.CallbackQuery):
+async def callback_worker_exchange(call: types.CallbackQuery):
     await __del_message(call)
     msg = "Введите слово 'Обмен или Меняю' и после, через пробел сумму, название валюты продажи, и валюту покупки. \n" \
           "\n" \
@@ -135,7 +134,6 @@ async def callback_worker(call: types.CallbackQuery):
     await bot.send_message(call["message"]["chat"]["id"], msg)
 
 
-@blacklist_check
 @dp.message_handler(commands=['aphorism'])
 async def send_aphorism(message: types.Message):
     await __del_message2(message)
@@ -143,9 +141,8 @@ async def send_aphorism(message: types.Message):
     await message.answer(aphorism_answer)
 
 
-@blacklist_check
 @dp.message_handler(commands=['reminder'])
-async def send_help(message: types.Message):
+async def get_reminder(message: types.Message):
     msg = "Введите дату и событие/действие о котором следует напомнить \n" \
           "\n" \
           "Пример 1: Напомни завтра в 14:00 вынести мусор \n" \
@@ -202,20 +199,13 @@ async def callback_worker(call: types.CallbackQuery):
 
 @blacklist_check
 @dp.message_handler(commands=['oracul'])
-async def send_help(message: types.Message):
+async def get_oracul(message: types.Message):
     msg = "Я могу заглянуть в будушее или дать совет \n" \
           "\n" \
           "Пример 1: Что меня ждет? \n" \
           "Пример 2: Укажи путь \n"
 
     await bot.send_message(message["chat"]["id"], msg)
-
-
-@dp.message_handler()
-async def message_handler(message: types.Message):
-    answer = short_talk.short_talk_answer(message=message)
-    if answer:
-        await message.answer(answer)
 
 
 @dp.message_handler(content_types=['location'])

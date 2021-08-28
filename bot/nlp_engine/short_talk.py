@@ -6,7 +6,6 @@ from nlp_engine import find_answer
 from commands.kurs import exchange_currency
 from commands.oracul import is_oracul_command, get_prediction
 from commands.reminder import create_reminder
-from nlp_engine.decorators import blacklist_check
 
 
 s3 = boto3.resource('s3',
@@ -45,22 +44,23 @@ def group_answer(message) -> str:
         answer = exchange_currency(text)
         return answer
 
-    if 'петрович' in text.lower() and any(word in text.lower() for word in ['напомни', 'напомнить', 'напомнишь']):
+    elif 'петрович' in text.lower() and any(word in text.lower() for word in ['напомни', 'напомнить', 'напомнишь']):
         answer = create_reminder(message)
         return answer
 
-    if is_oracul_command(text):
+    elif is_oracul_command(text):
         answer = get_prediction()
         return answer
 
-    if 'петрович' in text.lower():
+    elif 'петрович' in text.lower():
         text = text.lower()
         text = text.replace('петрович', '')
         answer_key = find_answer(text, short_talks)
         answer = choice(short_talks[answer_key]['answer'])
         return answer
 
-    return ''
+    else:
+        return ''
 
 
 def short_talk_answer(message=None) -> str:

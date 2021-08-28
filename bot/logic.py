@@ -30,8 +30,12 @@ async def __del_message2(message):
     )
 
 
+""" Commands """
+
+
+# START
 @dp.message_handler(commands=['start'])
-async def start(message: types.Message):
+async def _start_command(message: types.Message):
 
     user = User(message.from_user.id)
     try:
@@ -46,17 +50,47 @@ async def start(message: types.Message):
     await message.answer(commands.start_, reply_markup=keyboard)
 
 
+# HELP
 @dp.message_handler(commands=['help'])
-async def send_help(message: types.Message):
+async def _help_command(message: types.Message):
     await message.answer(commands.help_)
 
 
+# GET USERS (Admin)
 @dp.message_handler(commands=['getusers'])
-async def get_users(message: types.Message):
+async def _users_command(message: types.Message):
     await message.answer(admin.get_users())
 
 
-async def get_news(chat_id, page=0):
+# NEWS
+@dp.message_handler(commands=['news'])
+async def news_command(message: types.Message, page=0):
+    await get_news_from_db(message["chat"]["id"], page)
+
+
+@dp.callback_query_handler(lambda c: c.data in ['<<', '>>'])
+async def news_page_callback(call):
+    page = int(call.message.text.split('/')[0])
+
+    if call['data'] == ">>":
+        page = page + 1
+        await bot.delete_message(
+            call.message.chat.id,
+            call.message.message_id
+        )
+        await get_news_from_db(call["message"]["chat"]["id"], page)
+
+    if call['data'] == "<<":
+        page = page - 1
+
+        await bot.delete_message(
+            call.message.chat.id,
+            call.message.message_id
+        )
+        await get_news_from_db(call["message"]["chat"]["id"], page)
+
+
+async def get_news_from_db(chat_id, page=0):
     news_list = news.get_news()
 
     if page < 0:
@@ -75,36 +109,9 @@ async def get_news(chat_id, page=0):
         await bot.send_message(chat_id, "На этом пока все :)")
 
 
-@dp.message_handler(commands=['news'])
-async def get_news_command(message: types.Message, page=0):
-    await get_news(message["chat"]["id"], page)
-
-
-@dp.callback_query_handler(lambda c: c.data in ['<<', '>>'])
-async def characters_page_callback(call):
-    page = int(call.message.text.split('/')[0])
-
-    if call['data'] == ">>":
-        page = page + 1
-        await bot.delete_message(
-            call.message.chat.id,
-            call.message.message_id
-        )
-        await get_news(call["message"]["chat"]["id"], page)
-
-    if call['data'] == "<<":
-        page = page - 1
-
-        await bot.delete_message(
-            call.message.chat.id,
-            call.message.message_id
-        )
-        await get_news(call["message"]["chat"]["id"], page)
-
-
-@blacklist_check
+# CURRENCY / EXCHANGE
 @dp.message_handler(commands=['kurs'])
-async def send_about(message: types.Message):
+async def currency_command(message: types.Message):
     keyboard = types.InlineKeyboardMarkup()
 
     usd_rates = types.InlineKeyboardButton(text='USD', callback_data='USD')
@@ -119,12 +126,12 @@ async def send_about(message: types.Message):
 
 
 @dp.callback_query_handler(lambda c: c.data in ['USD', 'EUR', 'RUB'])
-async def callback_worker_currency(call: types.CallbackQuery):
+async def currency_callback(call: types.CallbackQuery):
     await bot.send_message(call["message"]["chat"]["id"], kurs.get_currency_rates(call['data']))
 
 
 @dp.callback_query_handler(lambda c: c.data == 'Exchange')
-async def callback_worker_exchange(call: types.CallbackQuery):
+async def exchange_callback(call: types.CallbackQuery):
     await __del_message(call)
     msg = "Введите слово 'Обмен или Меняю' и после, через пробел сумму, название валюты продажи, и валюту покупки. \n" \
           "\n" \
@@ -134,15 +141,17 @@ async def callback_worker_exchange(call: types.CallbackQuery):
     await bot.send_message(call["message"]["chat"]["id"], msg)
 
 
+# APHORISM
 @dp.message_handler(commands=['aphorism'])
-async def send_aphorism(message: types.Message):
+async def aphorism_command(message: types.Message):
     await __del_message2(message)
     aphorism_answer = aphorism.get_aphorism()
     await message.answer(aphorism_answer)
 
 
+# REMINDERS
 @dp.message_handler(commands=['reminder'])
-async def get_reminder(message: types.Message):
+async def reminder_command(message: types.Message):
     msg = "Введите дату и событие/действие о котором следует напомнить \n" \
           "\n" \
           "Пример 1: Напомни завтра в 14:00 вынести мусор \n" \
@@ -161,7 +170,7 @@ async def get_reminder(message: types.Message):
                                                 'delete_reminders',
                                                 'delete_reminders_confirm_yes',
                                                 'delete_reminders_confirm_no'])
-async def callback_worker(call: types.CallbackQuery):
+async def reminder_callback(call: types.CallbackQuery):
     if call['data'] == 'show_reminders':
         keyboard = types.InlineKeyboardMarkup()
         delete_reminders_btn = types.InlineKeyboardButton(text='Удаление напоминаний',
@@ -197,7 +206,7 @@ async def callback_worker(call: types.CallbackQuery):
         await bot.send_message(call["from"]["id"], "Правильное решение")
 
 
-@blacklist_check
+# ORACUL
 @dp.message_handler(commands=['oracul'])
 async def get_oracul(message: types.Message):
     msg = "Я могу заглянуть в будушее или дать совет \n" \
@@ -208,6 +217,7 @@ async def get_oracul(message: types.Message):
     await bot.send_message(message["chat"]["id"], msg)
 
 
+# GET LOCATION
 @dp.message_handler(content_types=['location'])
 async def handle_location(message: types.Message):
     tzf = TimezoneFinder()
@@ -218,6 +228,7 @@ async def handle_location(message: types.Message):
     await message.answer('Спасибо')
 
 
+# COMMON MESSAGE HANDLER
 @dp.message_handler()
 async def message_handler(message: types.Message):
     answer = short_talk.short_talk_answer(message=message)

@@ -43,7 +43,6 @@ class User:
 
         self.user_id = user_id
 
-
     def is_user_exist(self):
         check = users_collection.find_one({"user_id": self.user_id})
         if check:

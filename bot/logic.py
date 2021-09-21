@@ -1,11 +1,12 @@
 import logging
 import settings
 import commands
+from commands import keyboards
 from timezonefinder import TimezoneFinder
 from aiogram import Bot, Dispatcher, types
+from aiogram.dispatcher.filters import Text
 from commands import news, kurs, aphorism, reminder, admin
 from nlp_engine import short_talk
-from nlp_engine.decorators import blacklist_check
 from db import User
 from midlwares import BlackListMiddleware, AdminAccessMiddleware
 
@@ -30,7 +31,7 @@ async def __del_message2(message):
     )
 
 
-""" Commands """
+""" Commands & Logic"""
 
 
 # START
@@ -44,16 +45,13 @@ async def _start_command(message: types.Message):
         user.user_name = None
     user.add_user()
 
-    reg_button = types.KeyboardButton("Обновить часовой пояс", request_location=True)
-    keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
-    keyboard.add(reg_button)
-    await message.answer(commands.start_, reply_markup=keyboard)
+    await message.answer(commands.start_, reply_markup=keyboards.main_keyboard())
 
 
 # HELP
 @dp.message_handler(commands=['help'])
 async def _help_command(message: types.Message):
-    await message.answer(commands.help_)
+    await message.answer(commands.help_, reply_markup=keyboards.main_keyboard())
 
 
 # GET USERS (Admin)
@@ -63,8 +61,10 @@ async def _users_command(message: types.Message):
 
 
 # NEWS
+@dp.message_handler(Text(equals="Новости"))
 @dp.message_handler(commands=['news'])
-async def news_command(message: types.Message, page=0):
+async def with_puree(message: types.Message, page=1):
+    await __del_message2(message)
     await get_news_from_db(message["chat"]["id"], page)
 
 
@@ -90,11 +90,11 @@ async def news_page_callback(call):
         await get_news_from_db(call["message"]["chat"]["id"], page)
 
 
-async def get_news_from_db(chat_id, page=0):
+async def get_news_from_db(chat_id, page=1):
     news_list = news.get_news()
 
-    if page < 0:
-        page = 0
+    if page < 1:
+        page = 1
 
     navigation_btns = types.InlineKeyboardMarkup()
 
@@ -104,14 +104,16 @@ async def get_news_from_db(chat_id, page=0):
     navigation_btns.row(backward, forward)
 
     try:
-        await bot.send_message(chat_id, f"{page}/{len(news_list)-1}:\n{news_list[page]}", reply_markup=navigation_btns)
+        await bot.send_message(chat_id, f"{page}/{len(news_list)}:\n{news_list[page-1]}", reply_markup=navigation_btns)
     except IndexError:
         await bot.send_message(chat_id, "На этом пока все :)")
 
 
 # CURRENCY / EXCHANGE
+@dp.message_handler(Text(equals="Курс валют"))
 @dp.message_handler(commands=['kurs'])
 async def currency_command(message: types.Message):
+    await __del_message2(message)
     keyboard = types.InlineKeyboardMarkup()
 
     usd_rates = types.InlineKeyboardButton(text='USD', callback_data='USD')
@@ -142,6 +144,7 @@ async def exchange_callback(call: types.CallbackQuery):
 
 
 # APHORISM
+@dp.message_handler(Text(equals="Афоризм"))
 @dp.message_handler(commands=['aphorism'])
 async def aphorism_command(message: types.Message):
     await __del_message2(message)
@@ -150,6 +153,7 @@ async def aphorism_command(message: types.Message):
 
 
 # REMINDERS
+@dp.message_handler(Text(equals="Напоминания"))
 @dp.message_handler(commands=['reminder'])
 async def reminder_command(message: types.Message):
     msg = "Введите дату и событие/действие о котором следует напомнить \n" \
@@ -204,17 +208,6 @@ async def reminder_callback(call: types.CallbackQuery):
     if call['data'] == 'delete_reminders_confirm_no':
         await __del_message(call)
         await bot.send_message(call["from"]["id"], "Правильное решение")
-
-
-# ORACUL
-@dp.message_handler(commands=['oracul'])
-async def get_oracul(message: types.Message):
-    msg = "Я могу заглянуть в будушее или дать совет \n" \
-          "\n" \
-          "Пример 1: Что меня ждет? \n" \
-          "Пример 2: Укажи путь \n"
-
-    await bot.send_message(message["chat"]["id"], msg)
 
 
 # GET LOCATION

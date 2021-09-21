@@ -45,13 +45,13 @@ async def _start_command(message: types.Message):
         user.user_name = None
     user.add_user()
 
-    await message.answer(commands.start_, reply_markup=keyboards.main_keyboard())
+    await message.answer(commands.start_, reply_markup=keyboards.main_keyboard(message))
 
 
 # HELP
 @dp.message_handler(commands=['help'])
 async def _help_command(message: types.Message):
-    await message.answer(commands.help_, reply_markup=keyboards.main_keyboard())
+    await message.answer(commands.help_, reply_markup=keyboards.main_keyboard(message))
 
 
 # GET USERS (Admin)

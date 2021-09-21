@@ -42,9 +42,9 @@ async def on_startup(dp):
 
 if __name__ == '__main__':
     logging.info('Bot started')
-    # store_currency_rates()
+    store_currency_rates()
     logging.info('Initial currency rates data - stored')
-    # NewsCollector.collect_news_data()
+    NewsCollector.collect_news_data()
     logging.info('Initial news data - stored')
 
     try:

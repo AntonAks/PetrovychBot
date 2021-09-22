@@ -155,6 +155,7 @@ Thumbs.db #thumbnail cache on Windows
 # internal test
 test_folder
 temp
+parser_test.py
 test.py
 test.json
 

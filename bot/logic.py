@@ -3,9 +3,9 @@ import settings
 import commands
 from commands import keyboards
 from timezonefinder import TimezoneFinder
-from aiogram import Bot, Dispatcher, types
 from aiogram.dispatcher.filters import Text
-from commands import news, kurs, aphorism, reminder, admin
+from aiogram import Bot, Dispatcher, types
+from commands import news, kurs, aphorism, reminder, admin, oracul
 from nlp_engine import short_talk
 from db import User
 from midlwares import BlackListMiddleware, AdminAccessMiddleware
@@ -15,20 +15,6 @@ bot = Bot(token=settings.API_TOKEN)
 dp = Dispatcher(bot)
 dp.middleware.setup(AdminAccessMiddleware(settings.ACCESS_ID))
 dp.middleware.setup(BlackListMiddleware())
-
-
-async def __del_message(call):
-    await bot.delete_message(
-        call.message.chat.id,
-        call.message.message_id
-    )
-
-
-async def __del_message2(message):
-    await bot.delete_message(
-        message.chat.id,
-        message.message_id
-    )
 
 
 """ Commands & Logic"""
@@ -44,14 +30,14 @@ async def _start_command(message: types.Message):
     except Exception:
         user.user_name = None
     user.add_user()
-
-    await message.answer(commands.start_, reply_markup=keyboards.main_keyboard(message))
+    await message.answer(commands.start_, reply_markup=keyboards.location_keyboard(message))
 
 
 # HELP
-@dp.message_handler(commands=['help'])
-async def _help_command(message: types.Message):
-    await message.answer(commands.help_, reply_markup=keyboards.main_keyboard(message))
+@dp.message_handler(Text(equals="Меню"))
+@dp.message_handler(commands=['menu'])
+async def _menu_command(message: types.Message):
+    await message.answer('Сделайте всой выбор', reply_markup=keyboards.main_keyboard())
 
 
 # GET USERS (Admin)
@@ -61,11 +47,10 @@ async def _users_command(message: types.Message):
 
 
 # NEWS
-@dp.message_handler(Text(equals="Новости"))
-@dp.message_handler(commands=['news'])
+@dp.callback_query_handler(lambda c: c.data in ['news'])
 async def with_puree(message: types.Message, page=1):
-    await __del_message2(message)
-    await get_news_from_db(message["chat"]["id"], page)
+    await bot.delete_message(message["message"]["chat"]["id"], message["message"]["message_id"])
+    await get_news_from_db(message["message"]["chat"]["id"], page)
 
 
 @dp.callback_query_handler(lambda c: c.data in ['<<', '>>'])
@@ -110,10 +95,9 @@ async def get_news_from_db(chat_id, page=1):
 
 
 # CURRENCY / EXCHANGE
-@dp.message_handler(Text(equals="Курс валют"))
-@dp.message_handler(commands=['kurs'])
+@dp.callback_query_handler(lambda c: c.data in ['kurs'])
 async def currency_command(message: types.Message):
-    await __del_message2(message)
+    await bot.delete_message(message["message"]["chat"]["id"], message["message"]["message_id"])
     keyboard = types.InlineKeyboardMarkup()
 
     usd_rates = types.InlineKeyboardButton(text='USD', callback_data='USD')
@@ -124,7 +108,7 @@ async def currency_command(message: types.Message):
 
     keyboard.row(usd_rates, eur_rates, rub_rates)
     keyboard.add(exchange_btn)
-    await bot.send_message(message["chat"]["id"], "Выберите валюту", reply_markup=keyboard)
+    await bot.send_message(message["message"]["chat"]["id"], "Выберите валюту", reply_markup=keyboard)
 
 
 @dp.callback_query_handler(lambda c: c.data in ['USD', 'EUR', 'RUB'])
@@ -134,7 +118,7 @@ async def currency_callback(call: types.CallbackQuery):
 
 @dp.callback_query_handler(lambda c: c.data == 'Exchange')
 async def exchange_callback(call: types.CallbackQuery):
-    await __del_message(call)
+    await bot.delete_message(call.message.chat.id, call.message.message_id)
     msg = "Введите слово 'Обмен или Меняю' и после, через пробел сумму, название валюты продажи, и валюту покупки. \n" \
           "\n" \
           "Пример 1: Обмен 45.6 USD на UAH \n" \
@@ -144,17 +128,15 @@ async def exchange_callback(call: types.CallbackQuery):
 
 
 # APHORISM
-@dp.message_handler(Text(equals="Афоризм"))
-@dp.message_handler(commands=['aphorism'])
+@dp.callback_query_handler(lambda c: c.data in ['aphorism'])
 async def aphorism_command(message: types.Message):
-    await __del_message2(message)
+    await bot.delete_message(message["message"]["chat"]["id"], message["message"]["message_id"])
     aphorism_answer = aphorism.get_aphorism()
-    await message.answer(aphorism_answer)
+    await bot.send_message(message["message"]["chat"]["id"], aphorism_answer)
 
 
 # REMINDERS
-@dp.message_handler(Text(equals="Напоминания"))
-@dp.message_handler(commands=['reminder'])
+@dp.callback_query_handler(lambda c: c.data in ['reminder'])
 async def reminder_command(message: types.Message):
     msg = "Введите дату и событие/действие о котором следует напомнить \n" \
           "\n" \
@@ -167,7 +149,7 @@ async def reminder_command(message: types.Message):
 
     keyboard.add(saved_reminders_btn)
 
-    await bot.send_message(message["chat"]["id"], msg, reply_markup=keyboard)
+    await bot.send_message(message["message"]["chat"]["id"], msg, reply_markup=keyboard)
 
 
 @dp.callback_query_handler(lambda c: c.data in ['show_reminders',
@@ -182,7 +164,7 @@ async def reminder_callback(call: types.CallbackQuery):
         keyboard.add(delete_reminders_btn)
 
         reminders_str = reminder.get_reminders(call['from']['id'])
-        await __del_message(call)
+        await bot.delete_message(call.message.chat.id, call.message.message_id)
         if len(reminders_str) > 0:
             await bot.send_message(call["from"]["id"], reminders_str, reply_markup=keyboard)
         else:
@@ -197,17 +179,24 @@ async def reminder_callback(call: types.CallbackQuery):
                                                     callback_data='delete_reminders_confirm_no')
 
         keyboard.row(confirm_yes_btn, confirm_no_btn)
-        await __del_message(call)
+        await bot.delete_message(call.message.chat.id, call.message.message_id)
         await bot.send_message(call["from"]["id"], "Вы уверены?", reply_markup=keyboard)
 
     if call['data'] == 'delete_reminders_confirm_yes':
         reminder.del_reminders(call['from']['id'])
-        await __del_message(call)
+        await bot.delete_message(call.message.chat.id, call.message.message_id)
         await bot.send_message(call["from"]["id"], "Удалено")
 
     if call['data'] == 'delete_reminders_confirm_no':
-        await __del_message(call)
+        await bot.delete_message(call.message.chat.id, call.message.message_id)
         await bot.send_message(call["from"]["id"], "Правильное решение")
+
+
+# ORACUL
+@dp.callback_query_handler(lambda c: c.data in ['oracul'])
+async def with_puree(message: types.Message):
+    await bot.delete_message(message["message"]["chat"]["id"], message["message"]["message_id"])
+    await bot.send_message(message["message"]["chat"]["id"], oracul.get_prediction())
 
 
 # GET LOCATION
@@ -217,8 +206,8 @@ async def handle_location(message: types.Message):
     user = User(message.from_user.id)
     time_zone = tzf.timezone_at(lng=message.location.longitude, lat=message.location.latitude)
     user.update_timezone(time_zone)
-    await __del_message2(message)
-    await message.answer('Спасибо')
+    await bot.delete_message(message["message"]["chat"]["id"], message["message"]["message_id"])
+    await message.answer('Спасибо. Часовой пояс обновлён.')
 
 
 # COMMON MESSAGE HANDLER

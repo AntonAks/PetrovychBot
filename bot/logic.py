@@ -128,6 +128,13 @@ async def exchange_callback(call: types.CallbackQuery):
 
 
 # APHORISM
+@dp.message_handler(commands=['aphorism'])
+async def _users_command(message: types.Message):
+    await bot.delete_message(message["chat"]["id"], message["message_id"])
+    aphorism_answer = aphorism.get_aphorism()
+    await message.answer(aphorism_answer)
+
+
 @dp.callback_query_handler(lambda c: c.data in ['aphorism'])
 async def aphorism_command(message: types.Message):
     await bot.delete_message(message["message"]["chat"]["id"], message["message"]["message_id"])

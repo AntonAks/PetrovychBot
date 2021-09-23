@@ -32,9 +32,9 @@ def get_prediction():
                         aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY
                         )
 
-    predictions_list_obj = s3.Object(settings.AWS_S3_BUCKET_NAME, "predictions_list.json")
+    predictions_list_obj = s3.Object(settings.AWS_S3_BUCKET_NAME, "ru/predictions_list.json")
     body = predictions_list_obj.get()['Body'].read().decode("utf-8")
     predictions_list = json.loads(body)
     predictions = predictions_list['predictions_list']
-    answer = choice(predictions)
-    return answer
+    answer_string = choice(predictions)
+    return answer_string

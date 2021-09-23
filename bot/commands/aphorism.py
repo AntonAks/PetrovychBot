@@ -1,22 +1,20 @@
-import requests
 import json
+import boto3
+import settings
+from random import choice
 
 
 def get_aphorism():
-    aphorism = requests.get("http://api.forismatic.com/api/1.0/?method=getQuote&format=jsonp&jsonp=parseQuote")
 
-    def find_between(s, first, last):
-        try:
-            start = s.index(first) + len(first)
-            end = s.index(last, start)
-            return s[start:end]
-        except ValueError:
-            return ""
+    s3 = boto3.resource('s3',
+                        aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY
+                        )
 
-    aphorism_text = json.loads(find_between(s=aphorism.text, first="parseQuote(", last=")"))
-
-    answer_string = aphorism_text["quoteText"] + '\n'
-    answer_string = answer_string + '\n' + f"{aphorism_text['quoteAuthor']}"
+    predictions_list_obj = s3.Object(settings.AWS_S3_BUCKET_NAME, "ru/aphorism_rus.json")
+    body = predictions_list_obj.get()['Body'].read().decode("utf-8")
+    aphorism = choice(json.loads(body))
+    answer_string = aphorism["quoteText"] + '\n'
+    answer_string = answer_string + '\n' + f"{aphorism['quoteAuthor']}"
 
     return answer_string
-

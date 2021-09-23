@@ -33,9 +33,9 @@ async def _start_command(message: types.Message):
     await message.answer(commands.start_, reply_markup=keyboards.location_keyboard(message))
 
 
-# HELP
+# MENU
 @dp.message_handler(Text(equals="Меню"))
-@dp.message_handler(commands=['menu'])
+@dp.message_handler(commands=['menu', 'help'])
 async def _menu_command(message: types.Message):
     await message.answer('Сделайте всой выбор', reply_markup=keyboards.main_keyboard())
 

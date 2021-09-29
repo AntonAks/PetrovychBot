@@ -33,7 +33,7 @@ async def _start_command(message: types.Message):
     except Exception:
         user.user_name = None
     user.add_user()
-    await message.answer(commands.start_[chat.chat_language][''],
+    await message.answer(commands.start_[chat.chat_language],
                          reply_markup=keyboards.location_keyboard(message, chat.chat_language))
 
 

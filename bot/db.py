@@ -15,6 +15,7 @@ news_collection = db["news_collection"]
 messages_collection = db["chat_messages"]
 reminder_collection = db['reminder_collection']
 users_collection = db['users_collection']
+chat_collection = db['chat_collection']
 
 
 def store_message(message, correct=True):
@@ -23,6 +24,45 @@ def store_message(message, correct=True):
         "correct": correct,
         "message": message_dict
     })
+
+
+class Chat:
+
+    def __init__(self, chat_id):
+        self.chat_id = chat_id
+
+        if self.is_chat_exist():
+            self.__language = chat_collection.find_one({'chat_id': self.chat_id})['language']
+        else:
+            self.__language = 'ru'
+            self.save_chat()
+
+    def save_chat(self):
+
+        chat_collection.insert_one({
+            "chat_id": self.chat_id,
+            "language": self.__language,
+            "update_time": datetime.now()
+        })
+
+    def is_chat_exist(self):
+        check = chat_collection.find_one({"chat_id": self.chat_id})
+        if check:
+            return True
+        return False
+
+    @property
+    def chat_language(self):
+        return self.__language
+
+    @chat_language.setter
+    def chat_language(self, lang):
+        _chat_id = chat_collection.find_one({"chat_id": self.chat_id})
+        self.__language = lang
+        chat_collection.update_one({"_id": _chat_id["_id"]}, {"$set": {"language": self.__language}})
+
+    def __str__(self):
+        return f"{self.chat_id}, {self.__language},"
 
 
 class User:

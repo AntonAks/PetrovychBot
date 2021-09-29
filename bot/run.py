@@ -6,6 +6,7 @@ from aiogram import executor
 from logic import bot, dp
 from data_collector import NewsCollector, store_currency_rates
 from commands.reminder import check_reminder
+from multilang import reminder_check as rc
 
 
 async def task_store_currency_rates():
@@ -19,7 +20,8 @@ async def task_collect_news():
 async def task_check_and_send_remind():
     send_list = check_reminder()
     for i in send_list:
-        await bot.send_message(i['user'], f"Просили напомнить - {i['text']}")
+        print(i.keys())
+        await bot.send_message(i['user'], f"{rc[i['chat_lang']]} - {i['text']}")
 
 
 async def scheduler():
@@ -42,9 +44,9 @@ async def on_startup(dp):
 
 if __name__ == '__main__':
     logging.info('Bot started')
-    store_currency_rates()
+    # store_currency_rates()
     logging.info('Initial currency rates data - stored')
-    NewsCollector.collect_news_data()
+    # NewsCollector.collect_news_data()
     logging.info('Initial news data - stored')
 
     try:

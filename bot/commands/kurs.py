@@ -1,4 +1,5 @@
 import settings
+from multilang import currency_exchange_lang as cur_lang_dict
 from db import currency_rates_collection
 
 #
@@ -37,14 +38,11 @@ def get_currency_rates(currency: str) -> str:
     return string_currency_rates
 
 
-def __parse_message(message):
+def __parse_message(message, language):
 
     cur1 = None
     cur2 = None
-    cur_mapping = {'USD': ['usd', 'доллар', 'долларов', 'уе', 'зеленых', 'доллары'],
-                   'UAH': ['грн', 'uah', 'гривен', 'гривну', 'гривны'],
-                   'EUR': ['євро', 'евро', 'eur'],
-                   'RUB': ['рублей', 'рубль', 'rub', 'рубли']}
+    cur_mapping = cur_lang_dict['cur_mapping'][language]
 
     splited = message.split(' ')
 
@@ -64,21 +62,21 @@ def __parse_message(message):
     return value, cur1, cur2
 
 
-def exchange_currency(msg):
+def exchange_currency(msg, language):
     try:
-        value, cur1, cur2,  = __parse_message(msg)
+        value, cur1, cur2,  = __parse_message(msg, language)
     except IndexError:
-        return 'Пссс.. Могу предложить обменять валюту... воспользуйтесь меню /kurs'
+        return cur_lang_dict['index_error'][language]
 
     result_value = 0
 
     if None in [cur1, cur2, value]:
-        return 'Боюсь, что вы допустили ошибку, попробуйте еще разок...'
+        return cur_lang_dict['text_error'][language]
 
     if cur1 == 'RUB' and cur2 != 'UAH':
-        return 'Прости, для рубля я такое делать не буду...'
+        return cur_lang_dict['rub_error'][language]
     elif cur2 == 'RUB' and cur1 != 'UAH':
-        return 'Прости, для рубля я такое делать не буду...'
+        return cur_lang_dict['rub_error'][language]
 
     if cur1 == cur2:
         return f"{value} {cur2}"

@@ -2,6 +2,7 @@ import logging
 import requests
 import json
 import settings
+import boto3
 from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
 from urllib.request import Request, urlopen
@@ -270,3 +271,24 @@ class NewsCollector:
              "euro_news_world": result_list[7],
              }
         )
+
+
+class BeerCollection:
+
+    @staticmethod
+    def prepare_beer_collection():
+        
+        s3 = boto3.resource('s3',
+                    aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                    aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY
+                    )
+
+        predictions_list_obj = s3.Object(settings.AWS_S3_BUCKET_NAME, "beer_collection.json")
+        all_data = predictions_list_obj.get()['Body'].read().decode("utf-8")
+        return all_data
+
+
+if __name__ == "__main__":
+    BeerCollection.prepare_beer_collection()
+
+

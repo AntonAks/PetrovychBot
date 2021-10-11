@@ -31,3 +31,32 @@ def location_keyboard(msg, chat_lang):
         keyboard.add(location_button)
 
     return keyboard
+
+
+def beer_choice_abv(chat_lang):
+    keyboard = types.InlineKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+
+    non_alcohol_btn = types.InlineKeyboardButton(text=keyboards_lang[chat_lang]["beer_abv_na"], callback_data=f"No Alco")
+    low_alcohol_btn = types.InlineKeyboardButton(text=keyboards_lang[chat_lang]["beer_abv_low"], callback_data=f"Low")
+    mid_alcohol_btn = types.InlineKeyboardButton(text=keyboards_lang[chat_lang]["beer_abv_mid"], callback_data=f"Mid")
+    high_alcohol_btn = types.InlineKeyboardButton(text=keyboards_lang[chat_lang]["beer_abv_high"], callback_data=f"High")
+
+    keyboard.add(non_alcohol_btn)
+    keyboard.add(low_alcohol_btn)
+    keyboard.add(mid_alcohol_btn)
+    keyboard.add(high_alcohol_btn)
+    return keyboard
+
+
+def beer_choice_ibu(abv_choice, chat_lang):
+    keyboard = types.InlineKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+
+    low_ibu_btn = types.InlineKeyboardButton(text=keyboards_lang[chat_lang]["beer_ibu_low"], callback_data=f"{abv_choice}-Low")
+    mid_ibu_btn = types.InlineKeyboardButton(text=keyboards_lang[chat_lang]["beer_ibu_mid"], callback_data=f"{abv_choice}-Mid")
+    high_ibu_btn = types.InlineKeyboardButton(text=keyboards_lang[chat_lang]["beer_ibu_high"], callback_data=f"{abv_choice}-High")
+
+    keyboard.add(low_ibu_btn)
+    keyboard.add(mid_ibu_btn)
+    keyboard.add(high_ibu_btn)
+    return keyboard
+

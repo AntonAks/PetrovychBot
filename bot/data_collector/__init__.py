@@ -3,10 +3,13 @@ import requests
 import json
 import settings
 import boto3
+from botocore.exceptions import ClientError
 from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
+from random import choice
 from urllib.request import Request, urlopen
 from db import currency_rates_collection, messages_collection, news_collection
+from multilang import no_beer
 
 
 def store_currency_rates():
@@ -245,7 +248,7 @@ class NewsCollector:
             NewsCollector.get_investing_fin,
             NewsCollector.get_kor_news_world,
             NewsCollector.get_euro_news_world,
-            ]
+        ]
 
         result_list = []
 
@@ -274,21 +277,78 @@ class NewsCollector:
 
 
 class BeerCollection:
+    s3 = boto3.resource('s3',
+                        aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY
+                        )
 
-    @staticmethod
-    def prepare_beer_collection():
-        
-        s3 = boto3.resource('s3',
-                    aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-                    aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY
-                    )
+    @classmethod
+    def prepare_beer_collection(cls):
+        final_beer_dict = {
+            "ABV": {
+                "Non-Alcohol": {"IBU": {
+                    "Low": [],
+                    "Mid": [],
+                    "High": []
+                }},
+                "Low": {"IBU": {
+                    "Low": [],
+                    "Mid": [],
+                    "High": []
+                }},
+                "Mid": {"IBU": {
+                    "Low": [],
+                    "Mid": [],
+                    "High": []
+                }},
+                "High": {"IBU": {
+                    "Low": [],
+                    "Mid": [],
+                    "High": []
+                }}
+            }
+        }
 
-        predictions_list_obj = s3.Object(settings.AWS_S3_BUCKET_NAME, "beer_collection.json")
+        predictions_list_obj = cls.s3.Object(settings.AWS_S3_BUCKET_NAME, "beer_collection.json")
         all_data = predictions_list_obj.get()['Body'].read().decode("utf-8")
-        return all_data
+        all_data = json.loads(all_data)
 
+        for beer in [beer for beer in all_data if float(beer['global_rating_score']) >= 3]:
 
-if __name__ == "__main__":
-    BeerCollection.prepare_beer_collection()
+            if 2.5 <= float(beer['beer_abv']) <= 4.5:
+                abv = 'Low'
+            elif 4.5 < float(beer['beer_abv']) <= 6.9:
+                abv = 'Mid'
+            elif 6.9 < float(beer['beer_abv']):
+                abv = 'High'
+            else:
+                abv = 'Non-Alcohol'
 
+            if 0 <= float(beer['beer_ibu']) <= 25:
+                ibu = 'Low'
+            elif 25 < float(beer['beer_ibu']) <= 45:
+                ibu = 'Mid'
+            elif 45 < float(beer['beer_ibu']):
+                ibu = 'High'
+            else:
+                ibu = 'Mid'
 
+            final_beer_dict['ABV'][abv]['IBU'][ibu].append(beer)
+
+        try:
+            s3object = cls.s3.Object(settings.AWS_S3_BUCKET_NAME, 'final_beer_dict.json')
+            s3object.put(Body=(bytes(json.dumps(final_beer_dict).encode('UTF-8'))))
+        except ClientError as e:
+            logging.error(f"Error with updating for Final Beer dictionary. {e}")
+
+    @classmethod
+    def get_random_beer(cls, abv, ibu, language):
+        final_beer_dict = cls.s3.Object(settings.AWS_S3_BUCKET_NAME, "final_beer_dict.json")
+        final_beer_dict = final_beer_dict.get()['Body'].read().decode("utf-8")
+        final_beer_dict = json.loads(final_beer_dict)
+
+        try:
+            answer = choice(final_beer_dict['ABV'][abv]['IBU'][ibu])
+        except KeyError:
+            answer = None
+        return answer

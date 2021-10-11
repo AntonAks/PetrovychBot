@@ -7,7 +7,7 @@ from commands import keyboards
 from timezonefinder import TimezoneFinder
 from aiogram.dispatcher.filters import Text
 from aiogram import Bot, Dispatcher, types
-from commands import news, kurs, aphorism, reminder, admin, oracul
+from commands import news, kurs, aphorism, reminder, admin, oracul, beer
 from nlp_engine import short_talk
 from db import User, Chat
 from midlwares import BlackListMiddleware, AdminAccessMiddleware
@@ -52,9 +52,40 @@ async def _users_command(message: types.Message):
     await message.answer(admin.get_users())
 
 
+# BEER
+@dp.message_handler(commands=['beer'])
+async def _beer_command(message: types.Message):
+    chat = Chat(message["chat"]["id"])
+    await bot.send_message(message["chat"]["id"],
+                           multilang.beer_choice_text['abv_choice'][chat.chat_language],
+                           reply_markup=keyboards.beer_choice_abv(chat.chat_language))
+
+
+@dp.callback_query_handler(lambda c: c.data in ['No Alco', 'Low', 'Mid', 'High'])
+async def _beer_abv(message: types.Message):
+    chat = Chat(message["message"]["chat"]["id"])
+    await bot.delete_message(message["message"]["chat"]["id"], message["message"]["message_id"])
+    await bot.send_message(message["message"]["chat"]["id"],
+                           multilang.beer_choice_text['ibu_choice'][chat.chat_language],
+                           reply_markup=keyboards.beer_choice_ibu(message['data'], chat.chat_language))
+
+
+@dp.callback_query_handler(lambda c: c.data in beer.beer_combinations_list)
+async def _beer_ibu(message: types.Message):
+    chat = Chat(message["message"]["chat"]["id"])
+
+    abv, ibu = message['data'].split('-')[0], message['data'].split('-')[1]
+
+    await bot.delete_message(message["message"]["chat"]["id"], message["message"]["message_id"])
+    await bot.send_message(message["message"]["chat"]["id"], beer.get_beer_card(abv=abv,
+                                                                                ibu=ibu,
+                                                                                language=chat.chat_language),
+                           parse_mode='html')
+
+
 # NEWS
 @dp.callback_query_handler(lambda c: c.data in ['news'])
-async def with_puree(message: types.Message, page=1):
+async def news(message: types.Message, page=1):
     await bot.delete_message(message["message"]["chat"]["id"], message["message"]["message_id"])
     await get_news_from_db(message["message"]["chat"]["id"], page)
 
@@ -95,9 +126,12 @@ async def get_news_from_db(chat_id, page=1):
     navigation_btns.row(backward, forward)
 
     try:
-        await bot.send_message(chat_id, f"{page}/{len(news_list)}:\n{news_list[page-1]}", reply_markup=navigation_btns)
+        await bot.send_message(chat_id,
+                               f"{page}/{len(news_list)}:\n{news_list[page-1]}",
+                               disable_notification=True,
+                               reply_markup=navigation_btns)
     except IndexError:
-        await bot.send_message(chat_id, "На этом пока все :)")
+        await bot.send_message(chat_id, "¯\_(ツ)_/¯")
 
 
 # CURRENCY / EXCHANGE

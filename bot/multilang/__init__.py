@@ -16,7 +16,15 @@ keyboards_lang = {
         "lang_change": "Изменить язык",
         "location_update": "Обновить часовой пояс",
         "make_choice": "Сделайте свой выбор",
-        "timezone_updated": "Спасибо. Часовой пояс обновлён."
+        "timezone_updated": "Спасибо. Часовой пояс обновлён.",
+        "beer_abv_na": "Без алкоголя",
+        "beer_abv_low": "Слабо алкогольное",
+        "beer_abv_mid": "Средне алкогольное",
+        "beer_abv_high": "Крепкое",
+        "beer_ibu_low": "Слабо или без горечи",
+        "beer_ibu_mid": "Умеренно горькое",
+        "beer_ibu_high": "Горькое",
+
     },
     "ukr": {
         "oracul": "Що чекає на мене?",
@@ -28,7 +36,14 @@ keyboards_lang = {
         "lang_change": "Змінити мову",
         "location_update": "Оновити часовий пояс",
         "make_choice": "Зробіть свій вибір",
-        "timezone_updated": "Дякую. Часовий пояс оновлено."
+        "timezone_updated": "Дякую. Часовий пояс оновлено.",
+        "beer_abv_na": "Без алкоголю",
+        "beer_abv_low": "Слабо алкогольне",
+        "beer_abv_mid": "Середній алкоголь",
+        "beer_abv_high": "Міцне",
+        "beer_ibu_low": "Не гірке",
+        "beer_ibu_mid": "Помірно гірке",
+        "beer_ibu_high": "Гірке",
     },
 }
 
@@ -161,3 +176,27 @@ short_talks_lang = {
     }
 }
 
+beer_card_text = {
+    "beer_name": {"ru": "Название",
+                  "ukr": "Назва"},
+    "brewery_name": {"ru": "Пивоварня",
+                     "ukr": "Броварня"},
+    "beer_type": {"ru": "Стиль",
+                  "ukr": "Стиль"},
+    "beer_abv": {"ru": "ABV (Алкоголь)",
+                 "ukr": "ABV (Алкоголь)"},
+    "beer_ibu": {"ru": "IBU (Горечь)",
+                 "ukr": "IBU (Гіркота)"},
+    "global_rating_score": {"ru": "Рейтинг Untappd",
+                            "ukr": "Рейтинг Untappd"},
+}
+
+beer_choice_text = {
+    "abv_choice": {"ru": "На сколько крепкое?",
+                   "ukr": "На скільки міцне?"},
+    "ibu_choice": {"ru": "На сколько горькое?",
+                   "ukr": "На скільки гірке?"},
+}
+
+no_beer = {"ru": "К сожалению я не могу найти пива по этим критериям. Попробуйте снова - /beer",
+           "ukr": "Нажаль, я не можу знайти пива за цими крітеріями. Спробуйте ще - /beer"}

@@ -53,6 +53,14 @@ async def _users_command(message: types.Message):
 
 
 # BEER
+@dp.callback_query_handler(lambda c: c.data in ['beer'])
+async def _beer_command(message: types.Message):
+    chat = Chat(message["message"]["chat"]["id"])
+    await bot.send_message(message["message"]["chat"]["id"],
+                           multilang.beer_choice_text['abv_choice'][chat.chat_language],
+                           reply_markup=keyboards.beer_choice_abv(chat.chat_language))
+
+
 @dp.message_handler(commands=['beer'])
 async def _beer_command(message: types.Message):
     chat = Chat(message["chat"]["id"])

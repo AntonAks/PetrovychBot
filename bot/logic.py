@@ -95,7 +95,7 @@ async def _beer_ibu(message: types.Message):
 
 # NEWS
 @dp.callback_query_handler(lambda c: c.data in ['news'])
-async def news(message: types.Message, page=1):
+async def _news(message: types.Message, page=1):
     await bot.delete_message(message["message"]["chat"]["id"], message["message"]["message_id"])
     await get_news_from_db(message["message"]["chat"]["id"], page)
 

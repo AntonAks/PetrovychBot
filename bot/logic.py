@@ -74,10 +74,17 @@ async def _beer_command(message: types.Message):
 @dp.callback_query_handler(lambda c: c.data in ['No Alco', 'Low', 'Mid', 'High'])
 async def _beer_abv(message: types.Message):
     chat = Chat(message["message"]["chat"]["id"])
-    await bot.delete_message(message["message"]["chat"]["id"], message["message"]["message_id"])
-    await bot.send_message(message["message"]["chat"]["id"],
-                           multilang.beer_choice_text['ibu_choice'][chat.chat_language],
-                           reply_markup=keyboards.beer_choice_ibu(message['data'], chat.chat_language))
+    if message['data'] == 'No Alco':
+        await bot.delete_message(message["message"]["chat"]["id"], message["message"]["message_id"])
+        await bot.send_message(message["message"]["chat"]["id"], beer.get_beer_card(abv='No Alco',
+                                                                                    ibu=None,
+                                                                                    language=chat.chat_language),
+                               parse_mode='html')
+    else:
+        await bot.delete_message(message["message"]["chat"]["id"], message["message"]["message_id"])
+        await bot.send_message(message["message"]["chat"]["id"],
+                               multilang.beer_choice_text['ibu_choice'][chat.chat_language],
+                               reply_markup=keyboards.beer_choice_ibu(message['data'], chat.chat_language))
 
 
 @dp.callback_query_handler(lambda c: c.data in beer.beer_combinations_list)

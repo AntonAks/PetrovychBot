@@ -341,7 +341,7 @@ class BeerCollection:
             logging.error(f"Error with updating for Final Beer dictionary. {e}")
 
     @classmethod
-    def get_random_beer(cls, abv, ibu, language):
+    def get_random_beer(cls, abv, ibu):
         final_beer_dict = cls.s3.Object(settings.AWS_S3_BUCKET_NAME, "final_beer_dict.json")
         final_beer_dict = final_beer_dict.get()['Body'].read().decode("utf-8")
         final_beer_dict = json.loads(final_beer_dict)
@@ -350,4 +350,15 @@ class BeerCollection:
             answer = choice(final_beer_dict['ABV'][abv]['IBU'][ibu])
         except KeyError:
             answer = None
+        return answer
+
+    @classmethod
+    def get_non_acl_beer(cls):
+        final_beer_dict = cls.s3.Object(settings.AWS_S3_BUCKET_NAME, "final_beer_dict.json")
+        final_beer_dict = final_beer_dict.get()['Body'].read().decode("utf-8")
+        final_beer_dict = json.loads(final_beer_dict)
+        beer_dict = final_beer_dict['ABV']['Non-Alcohol']['IBU']['Low'] + \
+                    final_beer_dict['ABV']['Non-Alcohol']['IBU']['High'] + \
+                    final_beer_dict['ABV']['Non-Alcohol']['IBU']['Mid']
+        answer = choice(beer_dict)
         return answer

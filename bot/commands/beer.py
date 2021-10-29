@@ -10,7 +10,11 @@ for c in list(product(_abv, _ibu)):
 
 
 def get_beer_card(abv, ibu, language):
-    result = BeerCollection.get_random_beer(abv, ibu, language=language)
+
+    if abv != 'No Alco':
+        result = BeerCollection.get_random_beer(abv, ibu)
+    else:
+        result = BeerCollection.get_non_acl_beer()
 
     if result is not None:
         beer_card = f"{result['beer_url']}\n" \

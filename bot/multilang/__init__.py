@@ -2,6 +2,9 @@
 lang_collection = {"ru_lang": "Русский",
                    "ukr_lang": "Солов`їна"}
 
+lang_change_option = {"ru": "Выберите язык",
+                      "ukr": "Оберіть мову"}
+
 lang_change = {"ru": "Язык изменён",
                "ukr": "Мову змінено"}
 

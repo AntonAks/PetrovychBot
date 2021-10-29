@@ -9,7 +9,6 @@ from bs4 import BeautifulSoup
 from random import choice
 from urllib.request import Request, urlopen
 from db import currency_rates_collection, messages_collection, news_collection
-from multilang import no_beer
 
 
 def store_currency_rates():

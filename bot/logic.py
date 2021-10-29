@@ -279,7 +279,7 @@ async def _menu_command(message: types.Message):
     keyboard = types.InlineKeyboardMarkup()
     for lang in multilang.lang_collection.keys():
         keyboard.add(types.InlineKeyboardButton(text=multilang.lang_collection[lang], callback_data=lang))
-    await message.answer(multilang.lang_change[chat.chat_language], reply_markup=keyboard)
+    await message.answer(multilang.lang_change_option[chat.chat_language], reply_markup=keyboard)
 
 
 @dp.callback_query_handler(lambda c: c.data in ['ru_lang', 'ukr_lang'])

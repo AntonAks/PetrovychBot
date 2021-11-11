@@ -282,6 +282,12 @@ class BeerCollection:
                         )
 
     @classmethod
+    def get_quantity(cls):
+        predictions_list_obj = cls.s3.Object(settings.AWS_S3_BUCKET_NAME, "beer_collection.json")
+        all_data = predictions_list_obj.get()['Body'].read().decode("utf-8")
+        all_data = json.loads(all_data)
+
+    @classmethod
     def prepare_beer_collection(cls):
         final_beer_dict = {
             "ABV": {
@@ -362,3 +368,8 @@ class BeerCollection:
                     final_beer_dict['ABV']['Non-Alcohol']['IBU']['Mid']
         answer = choice(beer_dict)
         return answer
+
+
+if __name__ == '__main__':
+    mono_resp = requests.get('https://api.monobank.ua/bank/currency')
+    print(json.loads(mono_resp.text))

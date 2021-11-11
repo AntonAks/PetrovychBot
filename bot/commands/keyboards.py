@@ -8,13 +8,13 @@ def main_keyboard(chat_lang):
     oracul_button = types.InlineKeyboardButton(text=keyboards_lang[chat_lang]['oracul'], callback_data='oracul')
     beer_suggest = types.InlineKeyboardButton(text=keyboards_lang[chat_lang]['beer'], callback_data='beer')
     news_button = types.InlineKeyboardButton(text=keyboards_lang[chat_lang]['news'], callback_data='news')
-    kurs_button = types.InlineKeyboardButton(text=keyboards_lang[chat_lang]['kurs'], callback_data='kurs')
+    # kurs_button = types.InlineKeyboardButton(text=keyboards_lang[chat_lang]['kurs'], callback_data='kurs')
     aphorism_button = types.InlineKeyboardButton(text=keyboards_lang[chat_lang]['aphorism'], callback_data='aphorism')
     reminder_button = types.InlineKeyboardButton(text=keyboards_lang[chat_lang]['reminder'], callback_data='reminder')
 
     keyboard.add(news_button)
     keyboard.add(beer_suggest)
-    keyboard.add(kurs_button)
+    # keyboard.add(kurs_button)
     keyboard.add(aphorism_button)
     keyboard.add(oracul_button, reminder_button)
 

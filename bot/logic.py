@@ -152,37 +152,37 @@ async def get_news_from_db(chat_id, page=1):
 
 
 # CURRENCY / EXCHANGE
-@dp.callback_query_handler(lambda c: c.data in ['kurs'])
-async def currency_command(message: types.Message):
-    chat = Chat(message['message']["chat"]["id"])
-    await bot.delete_message(message["message"]["chat"]["id"], message["message"]["message_id"])
-    keyboard = types.InlineKeyboardMarkup()
-
-    usd_rates = types.InlineKeyboardButton(text='USD', callback_data='USD')
-    eur_rates = types.InlineKeyboardButton(text='EUR', callback_data='EUR')
-    rub_rates = types.InlineKeyboardButton(text='RUB', callback_data='RUB')
-
-    exchange_btn = types.InlineKeyboardButton(text=multilang.currency_lang[chat.chat_language]['name'],
-                                              callback_data='Exchange')
-
-    keyboard.row(usd_rates, eur_rates, rub_rates)
-    keyboard.add(exchange_btn)
-    await bot.send_message(message["message"]["chat"]["id"],
-                           multilang.currency_lang[chat.chat_language]['choice'],
-                           reply_markup=keyboard)
-
-
-@dp.callback_query_handler(lambda c: c.data in ['USD', 'EUR', 'RUB'])
-async def currency_callback(call: types.CallbackQuery):
-    await bot.send_message(call["message"]["chat"]["id"], kurs.get_currency_rates(call['data']))
-
-
-@dp.callback_query_handler(lambda c: c.data == 'Exchange')
-async def exchange_callback(call: types.CallbackQuery):
-    chat = Chat(call['message']["chat"]["id"])
-    await bot.delete_message(call.message.chat.id, call.message.message_id)
-    msg = multilang.currency_lang[chat.chat_language]['help']
-    await bot.send_message(call["message"]["chat"]["id"], msg)
+# @dp.callback_query_handler(lambda c: c.data in ['kurs'])
+# async def currency_command(message: types.Message):
+#     chat = Chat(message['message']["chat"]["id"])
+#     await bot.delete_message(message["message"]["chat"]["id"], message["message"]["message_id"])
+#     keyboard = types.InlineKeyboardMarkup()
+#
+#     usd_rates = types.InlineKeyboardButton(text='USD', callback_data='USD')
+#     eur_rates = types.InlineKeyboardButton(text='EUR', callback_data='EUR')
+#     rub_rates = types.InlineKeyboardButton(text='RUB', callback_data='RUB')
+#
+#     exchange_btn = types.InlineKeyboardButton(text=multilang.currency_lang[chat.chat_language]['name'],
+#                                               callback_data='Exchange')
+#
+#     keyboard.row(usd_rates, eur_rates, rub_rates)
+#     keyboard.add(exchange_btn)
+#     await bot.send_message(message["message"]["chat"]["id"],
+#                            multilang.currency_lang[chat.chat_language]['choice'],
+#                            reply_markup=keyboard)
+#
+#
+# @dp.callback_query_handler(lambda c: c.data in ['USD', 'EUR', 'RUB'])
+# async def currency_callback(call: types.CallbackQuery):
+#     await bot.send_message(call["message"]["chat"]["id"], kurs.get_currency_rates(call['data']))
+#
+#
+# @dp.callback_query_handler(lambda c: c.data == 'Exchange')
+# async def exchange_callback(call: types.CallbackQuery):
+#     chat = Chat(call['message']["chat"]["id"])
+#     await bot.delete_message(call.message.chat.id, call.message.message_id)
+#     msg = multilang.currency_lang[chat.chat_language]['help']
+#     await bot.send_message(call["message"]["chat"]["id"], msg)
 
 
 # APHORISM

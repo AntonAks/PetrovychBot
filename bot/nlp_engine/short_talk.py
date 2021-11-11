@@ -19,9 +19,9 @@ s3 = boto3.resource('s3',
 def private_answer(message, language, short_talks) -> str:
     text = message['text']
 
-    if text.lower().startswith(stl['exchange'][language][0]) or text.lower().startswith(stl['exchange'][language][1]):
-        answer = exchange_currency(text, language)
-        return answer
+    # if text.lower().startswith(stl['exchange'][language][0]) or text.lower().startswith(stl['exchange'][language][1]):
+    #     answer = exchange_currency(text, language)
+    #     return answer
 
     if any(word in text.lower() for word in stl['reminder_words'][language]):
         answer = create_reminder(message)
@@ -38,11 +38,11 @@ def private_answer(message, language, short_talks) -> str:
 
 def group_answer(message, language, short_talks) -> str:
     text = message['text']
-    if text.lower().startswith(stl['exchange'][language][0]) or text.lower().startswith(stl['exchange'][language][1]):
-        answer = exchange_currency(text, language)
-        return answer
+    # if text.lower().startswith(stl['exchange'][language][0]) or text.lower().startswith(stl['exchange'][language][1]):
+    #     answer = exchange_currency(text, language)
+    #     return answer
 
-    elif 'петрович' in text.lower() and any(word in text.lower() for word in stl['reminder_words'][language]):
+    if 'петрович' in text.lower() and any(word in text.lower() for word in stl['reminder_words'][language]):
         answer = create_reminder(message)
         return answer
 

@@ -1,4 +1,4 @@
-﻿# PetrovychBot
+﻿# PetrovychBot (Temporarily unavailable)
 
 ![alt text](https://github.com/AntonAks/PetrovychBot/blob/main/icon.jpg?raw=true)
 
